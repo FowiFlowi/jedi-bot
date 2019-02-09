@@ -5,4 +5,10 @@ module.exports = {
   commands: {
     start: 'start',
   },
+  buttons: {
+    welcome: {
+      mentor: '👨‍🏫 Я ментор',
+      student: '👶 Ищу ментора',
+    },
+  },
 }

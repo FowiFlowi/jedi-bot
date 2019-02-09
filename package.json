@@ -8,7 +8,7 @@
   "license": "MIT",
   "scripts": {
     "start": "node src",
-    "dev": "node src | pino-pretty",
+    "dev": "nodemon src | pino-pretty",
     "lint": "eslint .",
     "mocha": "NODE_ENV=test mocha .",
     "test": "yarn lint && yarn mocha"
