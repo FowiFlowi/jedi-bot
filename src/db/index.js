@@ -1,6 +1,8 @@
 const config = require('config')
 const { MongoClient } = require('mongodb')
 
+const createIndexes = require('./createIndexes')
+
 MongoClient.promise = Promise
 
 module.exports = {
@@ -8,6 +10,7 @@ module.exports = {
     if (!this.db) {
       const client = await MongoClient.connect(config.db.url, { useNewUrlParser: true })
       this.db = client.db(config.db.name)
+      await createIndexes(this.db)
     }
   },
   collection(name) {
