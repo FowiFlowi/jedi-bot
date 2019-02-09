@@ -1,11 +1,10 @@
 const config = require('config')
 const Telegraf = require('telegraf')
 
+const commands = require('./commands')
+
 const bot = new Telegraf(config.botToken)
 
-bot.start(ctx => {
-  const msg = `Hello, I'm ${ctx.botInfo.username}`
-  return ctx.reply(msg)
-})
+commands(bot)
 
 module.exports = bot
