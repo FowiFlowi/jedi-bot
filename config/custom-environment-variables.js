@@ -1,5 +1,7 @@
 module.exports = {
   botToken: 'BOT_TOKEN',
-  mongoUrl: 'MONGO_URL',
+  db: {
+    url: 'MONGO_URL',
+  },
   port: 'PORT',
 }
