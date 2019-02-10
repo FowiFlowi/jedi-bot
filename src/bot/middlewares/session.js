@@ -1,4 +1,3 @@
-/* eslint-disable no-underscore-dangle */
 const assert = require('assert').strict
 
 const db = require('../../db')
@@ -52,6 +51,7 @@ function getStorage(session) {
       Reflect.set(target, property, value)
       $set[`data.${property}`] = value
       delete $unset[`data.${property}`]
+      return true
     },
     deleteProperty(target, property) {
       if (property in target) {
@@ -60,6 +60,7 @@ function getStorage(session) {
       Reflect.deleteProperty(target, property)
       delete $set[`data.${property}`]
       $unset[`data.${property}`] = 1
+      return true
     },
   })
 }
@@ -95,6 +96,7 @@ module.exports = async (ctx, next) => {
     return next()
   }
   ctx.session = getStorage(await getSession(key))
+  ctx.state.sessionKey = key
   await next()
 
   return saveSession(key, ctx.session)

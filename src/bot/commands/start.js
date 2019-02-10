@@ -1,9 +1,6 @@
-const { commands, buttons } = require('config')
-const { Markup } = require('telegraf')
+const { scenes: { greeter }, commands } = require('config')
 
-module.exports = [commands.start, ctx => {
-  const { mentor, student } = buttons.welcome
-  const keyboard = Markup.keyboard([mentor, student], { columns: 2 }).resize().extra()
-  const msg = `Hello, I'm ${ctx.botInfo.username}`
-  return ctx.reply(msg, keyboard)
+module.exports = [commands.start, (ctx, next) => {
+  ctx.state.sceneName = greeter.self
+  return next()
 }]
