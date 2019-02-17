@@ -1,4 +1,5 @@
 const messages = require('./messages')
+const buttons = require('./buttons')
 
 module.exports = {
   db: {
@@ -7,37 +8,20 @@ module.exports = {
   logger: {
     level: process.env.LOG_LEVEL || 'debug',
   },
+  buttons,
   commands: {
     start: 'start',
     selfremove: 'selfremove',
-  },
-  buttons: {
-    greeter: {
-      mentor: '👨‍🏫 Я ментор',
-      student: '👶 Шукаю ментора',
-    },
-    home: {
-      student: {
-        mentors: '🔍 Знайти менторів',
-        myMentor: '🤔 Хто мій ментор?',
-        addDirections: '📚 Додати інших направлень',
-        myDirections: '📜 Мої направлення',
-      },
-      mentor: {
-
-      },
-      admin: {
-
-      },
-    },
   },
   scenes: {
     greeter: {
       self: 'greeter',
       student: 'student',
+      mentorRequest: 'mentorRequest',
     },
     home: {
       self: 'home',
+      addDirection: 'addDirection',
     },
   },
   roles: {

@@ -1,6 +1,7 @@
 const config = require('config')
-const Scene = require('telegraf/scenes/base')
 const { Markup } = require('telegraf')
+
+const Scene = require('../../utils/scene')
 
 const {
   buttons: { greeter: { mentor, student } },
@@ -11,15 +12,12 @@ const {
 const scene = new Scene(scenes.greeter.self)
 
 scene.enter(ctx => {
-  const msg = messages.welcome.replace('firstName', ctx.from.first_name)
+  const msg = ctx.state.sceneMessage || messages.welcome.replace('firstName', ctx.from.first_name)
   const keyboard = Markup.keyboard([mentor, student], { columns: 2 }).resize().extra()
   return ctx.replyWithHTML(msg, keyboard)
 })
 
-scene.hears(mentor, ctx => {
-  const msg = 'krasava'
-  return ctx.reply(msg)
-})
+scene.hears(mentor, ctx => ctx.scene.enter(scenes.greeter.mentorRequest))
 
 scene.hears(student, async ctx => ctx.scene.enter(scenes.greeter.student))
 

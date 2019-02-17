@@ -1,6 +1,9 @@
 const auth = require('./auth')
-const session = require('./session')
+const Session = require('./session')
 const handleSceneEnter = require('./handleSceneEnter')
+const db = require('../../db')
+
+const session = new Session({ db })
 
 module.exports = bot => {
   bot.use(session)

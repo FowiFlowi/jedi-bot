@@ -1,29 +1,27 @@
 const config = require('config')
-const Scene = require('telegraf/scenes/base')
-const { Markup } = require('telegraf')
 const env = require('node-env-manager')
 
-const directionService = require('../../service/direction')
+const Scene = require('../../utils/scene')
 const userService = require('../../service/user')
-const sceneBaseHandler = require('../../utils/sceneBaseHandler')
+const chooseDirectionHandler = require('../../utils/chooseDirectionHandler')
 
-const scene = new Scene(config.scenes.greeter.student, { handlers: [sceneBaseHandler] })
+const scene = new Scene(config.scenes.greeter.student)
 
-scene.enter(async ctx => {
-  const directions = await directionService.get()
-  ctx.scene.session.directions = directions
-  const msg = `Вибери порядковий номер одного з направлень:\n\n${directionService.format(directions)}`
-  return ctx.replyWithHTML(msg, Markup.removeKeyboard().extra())
+scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
+
+scene.hears(config.buttons.back, ctx => {
+  ctx.state.sceneMessage = 'Спробуй ще'
+  ctx.scene.enter(config.scenes.greeter.self)
 })
 
 scene.on('text', async ctx => {
   const num = parseInt(ctx.message.text, 10)
-  const direction = ctx.scene.session.directions[num - 1]
+  const direction = ctx.scene.state.directions[num - 1]
   if (!direction) {
     return ctx.reply('Щось не той номер ти вибрав. Спробуй ще')
   }
   const data = {
-    directions: [direction._id],
+    directions: [{ id: direction._id }],
     roles: [config.roles.student],
   }
   if (env.isDev()) {
