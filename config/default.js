@@ -13,6 +13,7 @@ module.exports = {
     start: 'start',
     selfremove: 'selfremove',
     mentors: 'mentors',
+    students: 'students',
   },
   scenes: {
     greeter: {

@@ -14,13 +14,19 @@ Object.assign(service, {
   get(query = {}) {
     return db.collection('users').find(query).toArray()
   },
-  async getMentors(ops = {}) {
-    const query = { roles: config.roles.mentor }
-    const mentors = await service.get(query)
+  async getByRole(role, ops = {}) {
+    const query = { roles: role }
+    const users = await service.get(query)
     if (!ops.format) {
-      return mentors
+      return users
     }
-    return mentors.map((mentor, indx) => `${indx + 1}. ${extractUsername(mentor)}|${mentor.tgId}`).join('\n')
+    return users.map((user, i) => `${i + 1}. ${extractUsername(user)}|${user.tgId}`).join('\n')
+  },
+  getMentors(ops = {}) {
+    return service.getByRole(config.roles.mentor, ops)
+  },
+  getStudents(ops = {}) {
+    return service.getByRole(config.roles.student, ops)
   },
   getOne(tgId) {
     tgId = +tgId // eslint-disable-line no-param-reassign
