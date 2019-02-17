@@ -2,6 +2,7 @@ const config = require('config')
 
 const Scene = require('../../../utils/scene')
 const userService = require('../../../service/user')
+const directionService = require('../../../service/direction')
 const chooseDirectionHandler = require('../../../utils/chooseDirectionHandler')
 
 const scene = new Scene(config.scenes.home.addDirection)
@@ -9,7 +10,13 @@ const scene = new Scene(config.scenes.home.addDirection)
 const sceneMessage = `Тут можеш додати ще направлень, котрі ти б хотів менторити.
 Вибери порядковий номер зі списку, або запропонуй свій та дочекайся підтвердження`
 
-scene.enter(chooseDirectionHandler(sceneMessage))
+scene.enter((ctx, next) => {
+  const mainRequest = ctx.state.user.mentorRequests[0]
+  if (!mainRequest.approved) {
+    return ctx.home(`Спочатку дочекайся підтвердження по цьому направленню: ${mainRequest.answers.direction}`)
+  }
+  return next()
+}, chooseDirectionHandler(sceneMessage))
 
 scene.hears(config.buttons.back, ctx => ctx.home('Іншим разом'))
 
@@ -30,7 +37,9 @@ scene.on('text', async ctx => {
 
   const modifier = { $addToSet: { directions: { id: dbDirection._id } } }
   ctx.state.user = await userService.update(ctx.from.id, modifier, { disableSetWrapper: true })
-  return ctx.home('Готово') // TODO: виводити оновлений список направлень
+  const ids = ctx.state.user.directions.map(item => item.id)
+  const approved = await directionService.get({ ids, format: true })
+  return ctx.home(`Готово, ось твій оновлений список:\n\n ${approved}`)
 })
 
 module.exports = scene

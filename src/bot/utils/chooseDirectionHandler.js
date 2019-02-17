@@ -8,5 +8,8 @@ module.exports = (listMessage, ops = {}) => async ctx => {
   ctx.scene.state.directions = directions
   const msg = `${listMessage}\n\n${directionService.format(directions)}`
   const keyboard = Markup.keyboard([config.buttons.back]).resize().extra()
-  return ctx.replyWithHTML(msg, keyboard)
+  ctx.replyWithHTML(msg, keyboard)
+  if (ctx.wizard) {
+    ctx.wizard.next()
+  }
 }

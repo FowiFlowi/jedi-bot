@@ -1,12 +1,20 @@
+const config = require('config')
+
+const bot = require('../')
 const db = require('../../db')
 const directionService = require('./direction')
 const extractUsername = require('../utils/extractUsername')
+const getRequestMessage = require('../utils/getRequestMessage')
 
 const service = {}
 
 module.exports = service
 
 Object.assign(service, {
+  getOne(tgId) {
+    tgId = +tgId // eslint-disable-line no-param-reassign
+    return db.collection('users').findOne({ tgId })
+  },
   async upsert(user) {
     if (!user) {
       return false
@@ -19,6 +27,7 @@ Object.assign(service, {
     return value
   },
   async update(tgId, data, ops = {}) {
+    tgId = +tgId // eslint-disable-line no-param-reassign
     const query = { tgId }
     const modifier = ops.disableSetWrapper ? data : { $set: data }
     modifier.$currentDate = { lastModified: true }
@@ -30,11 +39,12 @@ Object.assign(service, {
     const query = { tgId }
     return db.collection('users').deleteOne(query)
   },
-  async getStudentsByDirections(tgId, directions, ops = {}) {
+  async getStudentsByDirections(mentorTgId, directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {
       const query = {
         'directions.id': directionId,
-        'directions.mentorTgId': tgId,
+        'directions.mentorTgId': mentorTgId,
+        roles: config.roles.student,
       }
       const [students, direction] = await Promise.all([
         db.collection('users').find(query).toArray(),
@@ -63,5 +73,13 @@ Object.assign(service, {
     }
     // TODO: admin notification
     return service.update(tgId, modifier, { disableSetWrapper: true })
+  },
+  notifyNewRequest(user, request) {
+    const { text, keyboard } = getRequestMessage(user, request)
+    bot.telegram.sendMessage(config.adminChatId, text, keyboard)
+  },
+  notifyRequestApprove(tgId) {
+    const message = 'Єєє, твій запит на менторство був прийнятий! Чекай на перших студентів'
+    bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
   },
 })

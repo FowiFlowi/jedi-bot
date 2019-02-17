@@ -40,7 +40,9 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx =
   if (approved.length) {
     answer += `<b>Підтвердженні направлення:</b>\n${approved}`
   }
-  answer += `\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
+  if (unapproved.length) {
+    answer += `\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
+  }
   return ctx.replyWithHTML(answer)
 })
 

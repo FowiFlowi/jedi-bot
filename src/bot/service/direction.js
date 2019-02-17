@@ -18,6 +18,13 @@ Object.assign(service, {
   getOne(_id) {
     return db.collection('directions').findOne({ _id })
   },
+  async upsert(name) {
+    const query = { name }
+    const modifier = { $setOnInsert: { name } }
+    const ops = { upsert: true, returnOriginal: false }
+    const { value } = await db.collection('directions').findOneAndUpdate(query, modifier, ops)
+    return value
+  },
   format(directions) {
     return directions.map((item, indx) => `<b>${indx + 1}</b>. ${item.name}`).join('\n')
   },

@@ -6,4 +6,9 @@ module.exports = bot => {
     this.state.homeMessage = msg
     this.scene.enter(scenes.home.self)
   }
+
+  bot.context.homePass = function homePass(msg = 'Оке') {
+    this.state.homeMessage = msg
+    this.state.sceneName = scenes.home.self
+  }
 }
