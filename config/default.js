@@ -12,6 +12,7 @@ module.exports = {
   commands: {
     start: 'start',
     selfremove: 'selfremove',
+    mentors: 'mentors',
   },
   scenes: {
     greeter: {

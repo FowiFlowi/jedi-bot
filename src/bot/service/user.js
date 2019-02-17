@@ -11,6 +11,17 @@ const service = {}
 module.exports = service
 
 Object.assign(service, {
+  get(query = {}) {
+    return db.collection('users').find(query).toArray()
+  },
+  async getMentors(ops = {}) {
+    const query = { roles: config.roles.mentor }
+    const mentors = await service.get(query)
+    if (!ops.format) {
+      return mentors
+    }
+    return mentors.map((mentor, indx) => `${indx + 1}. ${extractUsername(mentor)}|${mentor.tgId}`).join('\n')
+  },
   getOne(tgId) {
     tgId = +tgId // eslint-disable-line no-param-reassign
     return db.collection('users').findOne({ tgId })

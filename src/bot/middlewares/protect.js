@@ -1,5 +1,9 @@
-const { roles: { developer } } = require('config')
+const { roles: { developer }, adminChatId } = require('config')
 
 const hasUserRole = require('../utils/hasUserRole')
 
-module.exports = (role = developer) => (ctx, next) => hasUserRole(ctx.state.user, role) && next()
+const protect = (role = developer) => (ctx, next) => hasUserRole(ctx.state.user, role) && next()
+
+protect.chat = (chatId = adminChatId) => (ctx, next) => ctx.chat.id === chatId && next()
+
+module.exports = protect
