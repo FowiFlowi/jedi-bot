@@ -18,6 +18,9 @@ Object.assign(service, {
   getOne(_id) {
     return db.collection('directions').findOne({ _id })
   },
+  getByName(name) {
+    return db.collection('directions').findOne({ name })
+  },
   async upsert(name) {
     const query = { name }
     const modifier = { $setOnInsert: { name } }

@@ -5,6 +5,8 @@ const db = require('../../db')
 const directionService = require('./direction')
 const extractUsername = require('../utils/extractUsername')
 const getRequestMessage = require('../utils/getRequestMessage')
+const regexpCollection = require('../utils/regexpCollection')
+const { bot: errors } = require('../../errors')
 
 const service = {}
 
@@ -20,6 +22,9 @@ Object.assign(service, {
     if (!ops.format) {
       return users
     }
+    return service.formatUsers(users)
+  },
+  formatUsers(users) {
     return users.map((user, i) => `${i + 1}. ${extractUsername(user)}|${user.tgId}`).join('\n')
   },
   getMentors(ops = {}) {
@@ -27,6 +32,27 @@ Object.assign(service, {
   },
   getStudents(ops = {}) {
     return service.getByRole(config.roles.student, ops)
+  },
+  async getByDirection(id, ops = {}) {
+    if (!regexpCollection.mongoId.test(id)) {
+      const direction = await directionService.getByName(id)
+      if (!direction) {
+        errors.noDirection()
+      }
+      id = direction._id // eslint-disable-line no-param-reassign
+    }
+    const query = { 'directions.id': id }
+    if (ops.role) {
+      query.roles = ops.role
+    }
+    const users = await service.get(query)
+    if (!users.length) {
+      errors.noUsers()
+    }
+    if (!ops.format) {
+      return users
+    }
+    return service.formatUsers(users)
   },
   getOne(tgId) {
     tgId = +tgId // eslint-disable-line no-param-reassign

@@ -16,4 +16,12 @@ module.exports = {
     error.status = 404
     throw error
   },
+  bot: {
+    noDirection(msg = 'No direction was found') {
+      throw new AppError(msg)
+    },
+    noUsers(msg = 'No users was found') {
+      throw new AppError(msg)
+    },
+  },
 }

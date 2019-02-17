@@ -1,9 +1,10 @@
 const userService = require('../service/user')
 const directionService = require('../service/direction')
 const getRequestMessage = require('../utils/getRequestMessage')
+const { approveActionTrigger } = require('../utils/regexpCollection')
 
 module.exports = bot => {
-  bot.action(/approve|\d{9}|.+/, async ctx => {
+  bot.action(approveActionTrigger, async ctx => {
     const { data } = ctx.callbackQuery
     const [, tgId, direction] = data.split('|')
     const user = await userService.getOne(tgId)
