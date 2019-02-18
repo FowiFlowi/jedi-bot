@@ -73,8 +73,8 @@ Object.assign(service, {
     const query = { tgId: user.tgId }
     const modifier = { $set: user, $currentDate: { lastModified: true } }
     const ops = { upsert: true, returnOriginal: false }
-    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, ops)
-    return value
+    const response = await db.collection('users').findOneAndUpdate(query, modifier, ops)
+    return { user: response.value, updated: response.lastErrorObject.updatedExisting }
   },
   async update(tgId, data, ops = {}) {
     tgId = +tgId // eslint-disable-line no-param-reassign
@@ -86,8 +86,9 @@ Object.assign(service, {
     return value
   },
   async remove(tgId) {
-    const query = { tgId }
-    return db.collection('users').deleteOne(query)
+    const query = { tgId: +tgId }
+    const { value: removedUser } = await db.collection('users').findOneAndDelete(query)
+    return removedUser
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {

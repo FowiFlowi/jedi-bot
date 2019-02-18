@@ -15,6 +15,7 @@ module.exports = {
     mentors: 'mentors',
     students: 'students',
     directions: 'directions',
+    remove: 'remove',
   },
   scenes: {
     greeter: {

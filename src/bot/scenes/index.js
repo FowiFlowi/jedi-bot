@@ -14,6 +14,7 @@ function getScenes(path) {
   }, [])
 }
 
-const stage = new Stage(getScenes(__dirname))
+const scenes = getScenes(__dirname)
+const stage = new Stage(scenes)
 
 module.exports = stage

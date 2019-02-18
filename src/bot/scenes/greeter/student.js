@@ -8,7 +8,11 @@ const chooseDirectionHandler = require('../../utils/chooseDirectionHandler')
 const scene = new Scene(config.scenes.greeter.student)
 
 // TODO: mark users that started with "Search mentor" but stopped
-scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
+if (env.isDev()) {
+  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:'))
+} else {
+  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
+}
 
 scene.hears(config.buttons.back, ctx => {
   ctx.state.sceneMessage = 'Спробуй ще'

@@ -10,7 +10,7 @@ class MongoSession {
 
   async getSession(key) {
     const session = await this.options.db.collection(this.options.collection).findOne({ key })
-    return session
+    return session || {}
   }
 
   clearSession(key) {
@@ -21,7 +21,9 @@ class MongoSession {
     if (!session || Object.keys(session).length === 0) {
       return this.clearSession(key)
     }
-    return this.options.db.collection(this.options.collection).replaceOne({ key }, session)
+    const data = { ...session, key }
+    return this.options.db.collection(this.options.collection)
+      .replaceOne({ key }, data, { upsert: true })
   }
 
   middleware() {

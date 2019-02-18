@@ -12,7 +12,6 @@ const extendContext = require('./context')
 const logger = require('../utils/logger')
 
 extendContext(bot)
-
 middlewares(bot)
 commands(bot)
 actions(bot)

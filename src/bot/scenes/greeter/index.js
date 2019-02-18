@@ -19,6 +19,6 @@ scene.enter(ctx => {
 
 scene.hears(mentor, ctx => ctx.scene.enter(scenes.greeter.mentorRequest))
 
-scene.hears(student, async ctx => ctx.scene.enter(scenes.greeter.student))
+scene.hears(student, ctx => ctx.scene.enter(scenes.greeter.student))
 
 module.exports = scene
