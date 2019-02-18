@@ -14,6 +14,7 @@ module.exports = {
     selfremove: 'selfremove',
     mentors: 'mentors',
     students: 'students',
+    directions: 'directions',
   },
   scenes: {
     greeter: {

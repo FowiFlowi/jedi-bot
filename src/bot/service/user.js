@@ -1,5 +1,9 @@
 const config = require('config')
 
+const service = {}
+
+module.exports = service
+
 const bot = require('../')
 const db = require('../../db')
 const directionService = require('./direction')
@@ -7,10 +11,6 @@ const extractUsername = require('../utils/extractUsername')
 const getRequestMessage = require('../utils/getRequestMessage')
 const regexpCollection = require('../utils/regexpCollection')
 const { bot: errors } = require('../../errors')
-
-const service = {}
-
-module.exports = service
 
 Object.assign(service, {
   get(query = {}) {
@@ -33,6 +33,10 @@ Object.assign(service, {
   getStudents(ops = {}) {
     return service.getByRole(config.roles.student, ops)
   },
+  getOneByDirection(id, ops = {}) {
+    ops.getOne = true // eslint-disable-line no-param-reassign
+    return service.getByDirection(id, ops)
+  },
   async getByDirection(id, ops = {}) {
     if (!regexpCollection.mongoId.test(id)) {
       const direction = await directionService.getByName(id)
@@ -45,6 +49,9 @@ Object.assign(service, {
     if (ops.role) {
       query.roles = ops.role
     }
+    if (ops.getOne) {
+      return service.getOne(query)
+    }
     const users = await service.get(query)
     if (!users.length) {
       errors.noUsers()
@@ -54,9 +61,9 @@ Object.assign(service, {
     }
     return service.formatUsers(users)
   },
-  getOne(tgId) {
-    tgId = +tgId // eslint-disable-line no-param-reassign
-    return db.collection('users').findOne({ tgId })
+  getOne(queryOrTgId) {
+    const query = queryOrTgId instanceof Object ? queryOrTgId : { tgId: +queryOrTgId }
+    return db.collection('users').findOne(query)
   },
   async upsert(user) {
     if (!user) {
