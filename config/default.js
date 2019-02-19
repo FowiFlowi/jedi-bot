@@ -37,4 +37,8 @@ module.exports = {
   },
   messages,
   creatorId: 147615474,
+  videos: {
+    greeter: 'CgADAgAD-QQAAr2kYEtTxCULyuyd0gI',
+    error: 'CgADAgAD0QIAAjscYUsW1kAJkbXB0wI',
+  },
 }
