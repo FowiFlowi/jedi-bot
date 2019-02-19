@@ -85,10 +85,21 @@ Object.assign(service, {
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
     return value
   },
-  async remove(tgId) {
+  async remove(tgId, ops = {}) {
     const query = { tgId: +tgId }
     const { value: removedUser } = await db.collection('users').findOneAndDelete(query)
+    if (ops.removeFromUsers && removedUser.roles.includes(config.roles.mentor)) {
+      await db.collection('users').removeDirectionsByMentor(removedUser.tgId)
+    }
     return removedUser
+  },
+  removeDirections(directionId) {
+    const modifier = { $pull: { directions: { id: directionId } } }
+    return db.collection('users').updateMany({}, modifier)
+  },
+  removeDirectionsByMentor(mentorTgId) {
+    const modifier = { $pull: { directions: { mentorTgId } } }
+    return db.collection('users').updateMany({ roles: config.roles.student }, modifier)
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {

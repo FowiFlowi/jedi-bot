@@ -1,8 +1,8 @@
-const { roles: { developer }, adminChatId } = require('config')
+const { adminChatId } = require('config')
 
 const hasUserRole = require('../utils/hasUserRole')
 
-const protect = (role = developer) => (ctx, next) => hasUserRole(ctx.state.user, role) && next()
+const protect = (...roles) => (ctx, next) => hasUserRole(ctx.state.user, ...roles) && next()
 
 protect.chat = (chatId = adminChatId) => (ctx, next) => ctx.chat.id === chatId && next()
 

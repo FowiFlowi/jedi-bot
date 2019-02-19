@@ -27,23 +27,28 @@ scene.hears(buttons.home.mentor.myStudents, protect(roles.mentor), async ctx => 
 scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor),
   ctx => ctx.scene.enter(scenes.home.addDirection))
 
-scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx => {
-  const { directions = [], mentorRequests } = ctx.state.user
+scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.student), async ctx => {
+  const { directions = [], roles: userRoles, mentorRequests } = ctx.state.user
+  const ids = directions.map(item => item.id)
+  const list = await directionService.get({ ids, format: true })
+  const messageIfEmpty = 'У тебе намає жодних направлень :c\nСкоріше додай нових!'
+  if (userRoles.includes(roles.student)) {
+    return ctx.replyWithHTML(list || messageIfEmpty)
+  }
+
   const unapproved = mentorRequests
     .filter(request => request.approved === false)
     .map((request, indx) => `${indx + 1}. ${request.answers.direction}`)
     .join('\n')
 
-  const ids = directions.map(item => item.id)
-  const approved = await directionService.get({ ids, format: true })
   let answer = ''
-  if (approved.length) {
-    answer += `<b>Підтвердженні направлення:</b>\n${approved}`
+  if (list.length) {
+    answer += `<b>Підтвердженні направлення:</b>\n${list}`
   }
   if (unapproved.length) {
     answer += `\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
   }
-  return ctx.replyWithHTML(answer)
+  return ctx.replyWithHTML(answer || messageIfEmpty)
 })
 
 scene.on('text', ctx => {

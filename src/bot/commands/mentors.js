@@ -40,10 +40,11 @@ async function getByDirection(directionName) {
 }
 
 module.exports = [commands.mentors, protect.chat(), async ctx => {
-  const [, param] = ctx.message.text.split(' ')
+  let [, param] = ctx.message.text.split(' ')
   if (!param) {
     return ctx.reply(await userService.getMentors({ format: true }))
   }
+  param = param.trim()
   return regexpCollection.tgId.test(param)
     ? ctx.replyWithHTML(await getUserInfo(param))
     : ctx.replyWithHTML(await getByDirection(param))

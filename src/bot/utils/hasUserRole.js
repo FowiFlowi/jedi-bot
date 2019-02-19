@@ -1,1 +1,2 @@
-module.exports = (user, role) => user && user.roles && user.roles.includes(role)
+module.exports = (user, ...roles) => user && user.roles
+  && roles.reduce((res, role) => res || user.roles.includes(role), false)

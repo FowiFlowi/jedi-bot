@@ -31,12 +31,24 @@ Object.assign(service, {
   getByName(name) {
     return db.collection('directions').findOne({ name })
   },
+  async removeByName(name, ops = {}) {
+    const query = { name }
+    const { value: removedDirection } = await db.collection('directions').findOneAndDelete(query)
+    if (ops.removeFromUsers) {
+      await userService.removeDirections(removedDirection._id)
+    }
+    return removedDirection
+  },
   async upsert(name) {
     const query = { name }
     const modifier = { $setOnInsert: { name } }
     const ops = { upsert: true, returnOriginal: false }
     const { value } = await db.collection('directions').findOneAndUpdate(query, modifier, ops)
     return value
+  },
+  async insert(name) {
+    const { ops: [inserted] } = await db.collection('directions').insertOne({ name })
+    return inserted
   },
   format(directions, ops = {}) {
     return directions.map((item, indx) => {

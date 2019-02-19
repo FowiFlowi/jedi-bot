@@ -1,17 +1,25 @@
 const { commands } = require('config')
 
 const userService = require('../service/user')
+const directionService = require('../service/direction')
 const protect = require('../middlewares/protect')
 const extractUsername = require('../utils/extractUsername')
+const regexpCollection = require('../utils/regexpCollection')
 
-module.exports = [commands.directions, protect.chat(), async ctx => {
-  const [, tgId] = ctx.message.text.split(' ')
-  if (!tgId) {
-    return ctx.reply('Provide telegram id to remove user')
+module.exports = [commands.remove, protect.chat(), async ctx => {
+  const [, param] = ctx.message.text.split(' ')
+  if (!param) {
+    return ctx.reply('Provide telegram id or direction name to remove docuemnt')
   }
-  const removedUser = await userService.remove(tgId.trim())
-  if (!removedUser) {
-    return ctx.reply('No user with such telegram id')
+  if (regexpCollection.tgId.test(param)) {
+    const tgId = param.trim()
+    const removedUser = await userService.remove(tgId, { removeFromUsers: true })
+    if (!removedUser) {
+      return ctx.reply('No user with such telegram id')
+    }
+    return ctx.reply(`Removed ${extractUsername(removedUser)}`)
   }
-  return ctx.reply(`Removed ${extractUsername(removedUser)}`)
+  const directionName = param.trim()
+  await directionService.removeByName(directionName, { removeFromUsers: true })
+  return ctx.reply('Removed direction')
 }]
