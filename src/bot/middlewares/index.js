@@ -6,8 +6,6 @@ const logger = require('./logger')
 const db = require('../../db')
 const getSessionKey = require('../utils/getSessionKey')
 
-// TODO: selfremove from unsupported chats
-
 const session = new Session({ db, getSessionKey })
 
 module.exports = bot => {
