@@ -12,6 +12,9 @@ const getRequestMessage = require('../utils/getRequestMessage')
 const regexpCollection = require('../utils/regexpCollection')
 const { bot: errors } = require('../../errors')
 
+// TODO: add notifications about new users to another users
+// TODO: generate lists to Telegra.ph (search mentors!)
+
 Object.assign(service, {
   get(query = {}) {
     return db.collection('users').find(query).toArray()
@@ -77,29 +80,59 @@ Object.assign(service, {
     return { user: response.value, updated: response.lastErrorObject.updatedExisting }
   },
   async update(tgId, data, ops = {}) {
-    tgId = +tgId // eslint-disable-line no-param-reassign
-    const query = { tgId }
+    const query = { tgId: +tgId }
     const modifier = ops.disableSetWrapper ? data : { $set: data }
     modifier.$currentDate = { lastModified: true }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
     return value
   },
-  async remove(tgId, ops = {}) {
+  async remove(tgId) {
     const query = { tgId: +tgId }
     const { value: removedUser } = await db.collection('users').findOneAndDelete(query)
-    if (ops.removeFromUsers && removedUser.roles.includes(config.roles.mentor)) {
-      await db.collection('users').removeDirectionsByMentor(removedUser.tgId)
-    }
     return removedUser
   },
   removeDirections(directionId) {
     const modifier = { $pull: { directions: { id: directionId } } }
     return db.collection('users').updateMany({}, modifier)
   },
-  removeDirectionsByMentor(mentorTgId) {
-    const modifier = { $pull: { directions: { mentorTgId } } }
-    return db.collection('users').updateMany({ roles: config.roles.student }, modifier)
+  async getMentorsByDirections(directions, ops = {}) {
+    const tasks = directions.map(async ({ id: directionId }) => {
+      const query = {
+        'directions.id': directionId,
+        roles: config.roles.mentor,
+      }
+      const [mentors, direction] = await Promise.all([
+        db.collection('users').find(query).toArray(),
+        directionService.getOne(directionId),
+      ])
+      if (!mentors.length) {
+        return false
+      }
+      return { direction, mentors }
+    })
+    const mentorsByDirections = (await Promise.all(tasks)).filter(item => item)
+    if (!ops.format) {
+      return mentorsByDirections
+    }
+    return mentorsByDirections
+      .map(({ direction, mentors }) => {
+        let text = `<b>${direction.name}</b>\n`
+        mentors.forEach((mentor, i) => text += `${i + 1}. ${service.getMentorInfo(mentor, direction)}`)
+        return text
+      })
+      .join('\n')
+  },
+  getMentorInfo(mentor, direction) {
+    const request = mentor.mentorRequests
+      .find(req => req.directionId.toString() === direction._id.toString())
+    const { answers: { linkedin, timeAmount } } = mentor.mentorRequests[0]
+    const { requestQuestionsMap: map } = config
+    const fullAnswers = { linkedin, timeAmount, ...request.answers }
+    const formattedAnswers = Object.entries(fullAnswers)
+      .filter(([question]) => question !== 'direction')
+      .reduce((text, [question, answer]) => text + `<b>${map[question]}</b>\n${answer}\n`, '')
+    return `${extractUsername(mentor)}\n${formattedAnswers}`
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {
@@ -124,24 +157,27 @@ Object.assign(service, {
         if (!students.length) {
           return `${text}Поки нікого`
         }
-        students.forEach((student, indx) => text += `${indx + 1}. ${extractUsername(student)}\n`)
+        students.forEach((student, i) => text += `${i + 1}. ${extractUsername(student)}\n`)
         return text
       })
       .join('\n')
   },
-  addMentorRequest(tgId, direction) {
-    const modifier = {
-      $addToSet: { mentorRequests: { answers: { direction }, approved: false } },
-    }
-    // TODO: admin notification
-    return service.update(tgId, modifier, { disableSetWrapper: true })
+  async addMentorRequest(user, request) {
+    const modifier = { $addToSet: { mentorRequests: request } }
+    await service.notifyNewRequest(user, request)
+    return service.update(user.tgId, modifier, { disableSetWrapper: true })
   },
   notifyNewRequest(user, request) {
     const { text, keyboard } = getRequestMessage(user, request)
     bot.telegram.sendMessage(config.adminChatId, text, keyboard)
   },
-  notifyRequestApprove(tgId) {
-    const message = 'Єєє, твій запит на менторство був прийнятий! Чекай на перших студентів'
-    bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
+  async notifyRequestApprove(tgId, direction) {
+    const message = `Єєє <b>${direction}</b>! Чекай на перших студентів`
+    await bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
+    return bot.telegram.sendAnimation(tgId, config.videos.requestApproved)
+  },
+  addDirection(tgId, directionId) {
+    const modifier = { $addToSet: { directions: { id: directionId } } }
+    return service.update(tgId, modifier, { disableSetWrapper: true })
   },
 })

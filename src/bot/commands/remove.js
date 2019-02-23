@@ -13,7 +13,7 @@ module.exports = [commands.remove, protect.chat(), async ctx => {
   }
   if (regexpCollection.tgId.test(param)) {
     const tgId = param.trim()
-    const removedUser = await userService.remove(tgId, { removeFromUsers: true })
+    const removedUser = await userService.remove(tgId)
     if (!removedUser) {
       return ctx.reply('No user with such telegram id')
     }

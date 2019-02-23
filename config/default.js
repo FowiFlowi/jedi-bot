@@ -17,6 +17,7 @@ module.exports = {
     directions: 'directions',
     remove: 'remove',
     add: 'add',
+    editRequest: 'editRequest',
   },
   scenes: {
     greeter: {
@@ -26,7 +27,8 @@ module.exports = {
     },
     home: {
       self: 'home',
-      addDirection: 'addDirection',
+      addStudentDirection: 'addStudentDirection',
+      addMentorDirection: 'addMentorDirection',
     },
   },
   roles: {
@@ -38,7 +40,16 @@ module.exports = {
   messages,
   creatorId: 147615474,
   videos: {
-    greeter: 'CgADAgAD-QQAAr2kYEtTxCULyuyd0gI',
+    greeter: 'CgADAgAD_QIAAjscYUuiYbFLYLXa0AI',
     error: 'CgADAgAD0QIAAjscYUsW1kAJkbXB0wI',
+    requestApproved: 'CgADAgAD6gIAAjscYUuOL36KSbKjKgI',
+  },
+  requestQuestionsMap: {
+    direction: 'Направлення',
+    experience: 'Досвід',
+    timeAmount: 'Кількість менторських годин на день',
+    linkedin: 'Linkedin',
+    offline: 'Можливість офлайн зустрічей',
+    city: 'Місто',
   },
 }

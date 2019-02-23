@@ -14,18 +14,21 @@ module.exports = bot => {
       return ctx.answerCbQuery('This request is already approved')
     }
 
-    request.approvedBy = ctx.from.id
-    request.approved = true
     const dbDirection = await directionService.upsert(request.answers.direction)
+    Object.assign(request, {
+      approvedBy: ctx.from.id,
+      approved: true,
+      directionId: dbDirection._id,
+    })
     const modifer = {
       $set: { mentorRequests: user.mentorRequests },
-      $addToSet: { directions: { id: dbDirection._id } },
+      $addToSet: { directions: { id: dbDirection._id, ...request.answers } },
     }
     const { text } = getRequestMessage(user, request, ctx.state.user)
     const tasks = [
       ctx.answerCbQuery('<3'),
       ctx.editMessageText(text),
-      userService.notifyRequestApprove(tgId),
+      userService.notifyRequestApprove(tgId, direction),
       userService.update(tgId, modifer, { disableSetWrapper: true }),
     ]
     return Promise.all(tasks)

@@ -4,6 +4,7 @@ const userService = require('../../service/user')
 const directionService = require('../../service/direction')
 const Scene = require('../../utils/scene')
 const getKeyboard = require('../../utils/getKeyboard')
+const hasUserRole = require('../../utils/hasUserRole')
 const protect = require('../../middlewares/protect')
 
 const { scenes, buttons, roles } = config
@@ -15,17 +16,16 @@ scene.enter(ctx => {
   return ctx.replyWithHTML(ctx.state.homeMessage, keyboard)
 })
 
-scene.hears(buttons.home.mentor.myStudents, protect(roles.mentor), async ctx => {
-  const { from: { id: tgId }, state: { user: { directions } } } = ctx
-  if (!directions || !directions.length) {
-    return ctx.reply('У тебе відсутні підтвердженні напрвлення :c')
-  }
-  const answer = await userService.getStudentsByDirections(tgId, directions, { format: true })
-  return ctx.replyWithHTML(answer)
-})
-
-scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor),
-  ctx => ctx.scene.enter(scenes.home.addDirection))
+scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor, roles.student),
+  ctx => {
+    if (hasUserRole(ctx.state.user, roles.mentor)) {
+      return ctx.scene.enter(scenes.home.addMentorDirection)
+    }
+    if (hasUserRole(ctx.state.user, roles.student)) {
+      return ctx.scene.enter(scenes.home.addStudentDirection)
+    }
+    return false
+  })
 
 scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.student), async ctx => {
   const { directions = [], roles: userRoles, mentorRequests } = ctx.state.user
@@ -38,7 +38,7 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.studen
 
   const unapproved = mentorRequests
     .filter(request => request.approved === false)
-    .map((request, indx) => `${indx + 1}. ${request.answers.direction}`)
+    .map((request, indx) => `${indx + 1}. <code>${request.answers.direction}</code>`)
     .join('\n')
 
   let answer = ''
@@ -46,14 +46,16 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.studen
     answer += `<b>Підтвердженні направлення:</b>\n${list}`
   }
   if (unapproved.length) {
-    answer += `\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
+    answer += `\n\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
   }
   return ctx.replyWithHTML(answer || messageIfEmpty)
 })
 
-scene.on('text', ctx => {
-  const msg = 'Незабаром...'
-  return ctx.reply(msg)
+scene.hears(buttons.home.student.mentors, protect(roles.student), async ctx => {
+  const text = await userService.getMentorsByDirections(ctx.state.user.directions, { format: true })
+  const messageIfEmpty = 'По твоїх направленнях поки немає менторів, але вони незабаром прийдуть.\n'
+    + 'Спробуй додати інших направлень'
+  return ctx.replyWithHTML(text || messageIfEmpty)
 })
 
 module.exports = scene

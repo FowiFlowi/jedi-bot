@@ -9,13 +9,11 @@ module.exports = {
   home: {
     student: {
       mentors: '🔍 Знайти менторів',
-      myMentor: '🤔 Хто мій ментор?',
       addDirection: '📚 Додати направлення',
       myDirections: '📜 Мої направлення',
       // becomeMentor: '🚀 Стати ментором',
     },
     mentor: {
-      myStudents: '👨‍🎓 Мої студенти',
       addDirection: '📚 Додати направлення',
       myDirections: '📜 Мої направлення',
       // becomeStudent: '🔭 Стати студентом',

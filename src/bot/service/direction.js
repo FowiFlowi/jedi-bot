@@ -52,7 +52,7 @@ Object.assign(service, {
   },
   format(directions, ops = {}) {
     return directions.map((item, indx) => {
-      let row = `<b>${indx + 1}</b>. ${item.name}`
+      let row = `${indx + 1}. <code>${item.name}</code>`
       if (ops.markHasMentors && item.hasMentors) {
         row += '|<b>has mentors</b>'
       }

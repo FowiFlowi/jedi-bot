@@ -29,7 +29,7 @@ const stepHandler = (question, answerProperty) => {
 }
 
 const sceneMessage = 'Аби стати ментором, тобі знадобиться заповнити коротку анкету'
-  + '\n\nПерше питання: <b>котре направлення ти би хотів менторити?</b>\n'
+  + '\n\nПерше питання: <b>котре направлення ти хочеш менторити?</b>\n'
   + 'Вибери порядковий номер або запропонуй світ варіант'
 
 const scene = new WizardScene(scenes.greeter.mentorRequest,
@@ -50,7 +50,9 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     ctx.scene.state.answerProperty = 'experience'
     return ctx.wizard.next()
   },
-  stepHandler('<b>Скільки часу плануєш виділяти на менторство?</b>', 'timeAmount'),
+  stepHandler('<b>Скільки годин на день плануєш виділяти на менторство?</b>', 'timeAmount'),
+  stepHandler('<b>Маєш можливість зустрічатись офлайн?</b>', 'offline'),
+  stepHandler('<b>Місто</b>', 'city'),
   stepHandler('<b>Посилання на linkedin</b>', 'linkedin'),
   async ctx => {
     if (ctx.message.text === buttons.back) {

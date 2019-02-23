@@ -8,11 +8,8 @@ const chooseDirectionHandler = require('../../utils/chooseDirectionHandler')
 const scene = new Scene(config.scenes.greeter.student)
 
 // TODO: mark users that started with "Search mentor" but stopped
-if (env.isDev()) {
-  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:'))
-} else {
-  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
-}
+
+scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
 
 scene.hears(config.buttons.back, ctx => {
   ctx.state.sceneMessage = 'Спробуй ще'
@@ -23,7 +20,7 @@ scene.on('text', async ctx => {
   const num = parseInt(ctx.message.text, 10)
   const direction = ctx.scene.state.directions[num - 1]
   if (!direction) {
-    return ctx.reply('Щось не той номер ти вибрав. Спробуй ще')
+    return ctx.reply('Щось не той номер. Спробуй ще')
   }
   const data = {
     directions: [{ id: direction._id }],
