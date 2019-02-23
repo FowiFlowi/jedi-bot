@@ -7,7 +7,7 @@
   "author": "fowi",
   "license": "MIT",
   "scripts": {
-    "start": "node src",
+    "start": "node src | pino-pretty",
     "dev": "nodemon src | pino-pretty",
     "lint": "eslint .",
     "mocha": "NODE_ENV=test mocha .",
