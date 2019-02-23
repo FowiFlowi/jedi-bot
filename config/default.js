@@ -52,4 +52,5 @@ module.exports = {
     offline: 'Можливість офлайн зустрічей',
     city: 'Місто',
   },
+  adminChatId: -322323327,
 }
