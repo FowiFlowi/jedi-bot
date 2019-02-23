@@ -8,7 +8,7 @@ const mapFromUser = require('../utils/mapFromUser')
 module.exports = async (ctx, next) => {
   const { user, updated } = await userService.upsert(mapFromUser(ctx.from))
   ctx.state.user = user
-  if (!updated && !ctx.message.text.match(/^\/start/)) {
+  if (!updated && (ctx.message && ctx.message.text && !ctx.message.text.match(/^\/start/))) {
     ctx.state.sceneName = config.scenes.greeter.self
   }
   if (!env.isDev()) {
