@@ -17,7 +17,7 @@ module.exports = {
     directions: 'directions',
     remove: 'remove',
     add: 'add',
-    editRequest: 'editRequest',
+    edit: 'edit',
   },
   scenes: {
     greeter: {

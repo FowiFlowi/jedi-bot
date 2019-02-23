@@ -14,6 +14,7 @@ const { bot: errors } = require('../../errors')
 
 // TODO: add notifications about new users to another users
 // TODO: generate lists to Telegra.ph (search mentors!)
+// TODO: Reasearch links for users without username
 
 Object.assign(service, {
   get(query = {}) {
@@ -163,13 +164,16 @@ Object.assign(service, {
       .join('\n')
   },
   async addMentorRequest(user, request) {
-    const modifier = { $addToSet: { mentorRequests: request } }
-    await service.notifyNewRequest(user, request)
-    return service.update(user.tgId, modifier, { disableSetWrapper: true })
+    const newRequestMsgId = await service.notifyNewRequest(user, request)
+    const modifier = { $addToSet: { mentorRequests: { ...request, newRequestMsgId } } }
+    await service.update(user.tgId, modifier, { disableSetWrapper: true })
+    return newRequestMsgId
   },
-  notifyNewRequest(user, request) {
+  async notifyNewRequest(user, request) {
     const { text, keyboard } = getRequestMessage(user, request)
-    bot.telegram.sendMessage(config.adminChatId, text, keyboard)
+    const { message_id: messageId } = await bot.telegram
+      .sendMessage(config.adminChatId, text, keyboard)
+    return messageId
   },
   async notifyRequestApprove(tgId, direction) {
     const message = `Єєє <b>${direction}</b>! Чекай на перших студентів`
@@ -179,5 +183,30 @@ Object.assign(service, {
   addDirection(tgId, directionId) {
     const modifier = { $addToSet: { directions: { id: directionId } } }
     return service.update(tgId, modifier, { disableSetWrapper: true })
+  },
+  async editAnswer(tgId, question, newAsnwer) {
+    const user = await service.getOne(tgId)
+    if (!user) {
+      return errors.noUsers()
+    }
+    const request = user.mentorRequests.find(req => !req.approved)
+    if (!request) {
+      return errors.noUnapprovedRequest()
+    }
+    if (!request.answers[question]) {
+      return errors.noRequestQuestion()
+    }
+    request.answers[question] = newAsnwer
+    const { text, keyboard } = getRequestMessage(user, request)
+    return Promise.all([
+      service.update(tgId, { mentorRequests: user.mentorRequests }),
+      bot.telegram.editMessageText(
+        config.adminChatId,
+        request.newRequestMsgId,
+        undefined,
+        text,
+        keyboard,
+      ),
+    ])
   },
 })

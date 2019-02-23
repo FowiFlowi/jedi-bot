@@ -65,6 +65,8 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     if (ctx.scene.state.isNewDirection) {
       request.isNewDirection = true
     }
+    request.newRequestMsgId = await userService.notifyNewRequest(ctx.state.user, request)
+
     const data = {
       mentorRequests: [request],
       roles: [roles.mentor],
@@ -73,7 +75,6 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
       data.roles.push(roles.developer)
     }
     ctx.state.user = await userService.update(ctx.from.id, data)
-    await userService.notifyNewRequest(ctx.state.user, request)
     return ctx.home('Готово. Залишилось дочекатись підтвердження від адміністраторів. Вони от-от тобі напишуть')
   })
 

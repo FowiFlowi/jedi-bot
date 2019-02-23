@@ -23,5 +23,11 @@ module.exports = {
     noUsers(msg = 'No users was found') {
       throw new AppError(msg)
     },
+    noUnapprovedRequest(msg = 'No unapproved requests was found') {
+      throw new AppError(msg)
+    },
+    noRequestQuestion(msg = 'No request question was found') {
+      throw new AppError(msg)
+    },
   },
 }

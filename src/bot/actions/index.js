@@ -8,6 +8,9 @@ module.exports = bot => {
     const { data } = ctx.callbackQuery
     const [, tgId, direction] = data.split('|')
     const user = await userService.getOne(tgId)
+    if (!user) {
+      return ctx.answerCbQuery('User has removed')
+    }
     const request = user.mentorRequests
       .find(req => req.answers.direction === direction && !req.approved)
     if (!request) {
