@@ -25,7 +25,7 @@ module.exports = async (ctx, next) => {
     if (e instanceof AppError) {
       return ctx.message = e.message
     }
-    if (env.isLocal() || env.isDevelopment()) {
+    if (env.isLocal() || env.isDev()) {
       ctx.body = e
     }
     return ctx.app.emit('error', e)

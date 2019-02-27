@@ -51,6 +51,9 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.studen
   return ctx.replyWithHTML(answer || messageIfEmpty)
 })
 
+scene.hears(buttons.home.mentor.mentors, protect(roles.mentor),
+  async ctx => ctx.scene.enter(scenes.home.otherMentors))
+
 scene.hears(buttons.home.student.mentors, protect(roles.student), async ctx => {
   const text = await userService.getMentorsByDirections(ctx.state.user.directions, { format: true })
   const messageIfEmpty = 'По твоїх направленнях поки немає менторів, але вони незабаром прийдуть.\n'

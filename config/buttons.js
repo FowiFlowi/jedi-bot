@@ -16,6 +16,7 @@ module.exports = {
     mentor: {
       addDirection: '📚 Додати направлення',
       myDirections: '📜 Мої направлення',
+      mentors: '🔍 Подивитись на інших менторів',
       // becomeStudent: '🔭 Стати студентом',
     },
     admin: {
