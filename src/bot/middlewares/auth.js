@@ -12,6 +12,9 @@ module.exports = async (ctx, next) => {
     return ctx.leaveChat(ctx.chat.id)
   }
   const { user, updated } = await userService.upsert(mapFromUser(ctx.from))
+  if (user.roles && user.roles.includes(config.roles.mentor) && !user.username) {
+    return ctx.replyWithHTML(config.messages.shouldMentorUsername)
+  }
   ctx.state.user = user
   if (!updated && (ctx.message && ctx.message.text && !ctx.message.text.match(/^\/start/))) {
     ctx.state.sceneName = config.scenes.greeter.self

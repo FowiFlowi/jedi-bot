@@ -18,7 +18,12 @@ scene.enter(async ctx => {
   return !ctx.state.sceneMessage && ctx.replyWithAnimation(config.videos.greeter)
 })
 
-scene.hears(mentor, ctx => ctx.scene.enter(scenes.greeter.mentorRequest))
+scene.hears(mentor, ctx => {
+  if (!ctx.state.user.username) {
+    return ctx.replyWithHTML(config.messages.shouldMentorUsername)
+  }
+  return ctx.scene.enter(scenes.greeter.mentorRequest)
+})
 
 scene.hears(student, ctx => ctx.scene.enter(scenes.greeter.student))
 

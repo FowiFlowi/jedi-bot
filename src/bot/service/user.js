@@ -16,7 +16,6 @@ const { bot: errors } = require('../../errors')
 // TODO: generate lists to Telegra.ph (search mentors!)
 // TODO: add FAQ/info button
 // TODO: mark users that started with "Search mentor" but stopped (no desired direction)
-// TODO: add checking username
 // TODO: add statistic
 // TODO: add "became mentor" for students
 // TODO: add logging request time
