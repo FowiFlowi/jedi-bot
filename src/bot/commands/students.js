@@ -5,7 +5,7 @@ const directionService = require('../service/direction')
 const protect = require('../middlewares/protect')
 const extractUsername = require('../utils/extractUsername')
 const regexpCollection = require('../utils/regexpCollection')
-const AppError = require('../../errors/AppError')
+const CustomError = require('../../errors/CustomError')
 
 async function getUserInfo(tgId) {
   const student = await userService.getOne(tgId)
@@ -26,7 +26,7 @@ async function getByDirection(directionName) {
   try {
     return await userService.getByDirection(directionName, { role: roles.student, format: true })
   } catch (e) {
-    if (e instanceof AppError) {
+    if (e instanceof CustomError) {
       return e.message
     }
     throw e

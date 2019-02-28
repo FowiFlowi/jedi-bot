@@ -1,6 +1,6 @@
 const env = require('node-env-manager')
 
-const AppError = require('../errors/AppError')
+const CustomError = require('../errors/CustomError')
 
 if (!('toJSON' in Error.prototype)) {
   Object.defineProperty(Error.prototype, 'toJSON', { // eslint-disable-line no-extend-native
@@ -22,7 +22,7 @@ module.exports = async (ctx, next) => {
   } catch (e) {
     e.status = e.status || 500
     ctx.status = e.status
-    if (e instanceof AppError) {
+    if (e instanceof CustomError) {
       return ctx.message = e.message
     }
     if (env.isLocal() || env.isDev()) {

@@ -2,7 +2,7 @@ const { commands } = require('config')
 
 const userService = require('../service/user')
 const protect = require('../middlewares/protect')
-const AppError = require('../../errors/AppError')
+const CustomError = require('../../errors/CustomError')
 
 module.exports = [commands.edit, protect.chat(), async ctx => {
   const params = ctx.message.text.split(' ')
@@ -13,7 +13,7 @@ module.exports = [commands.edit, protect.chat(), async ctx => {
   try {
     await userService.editAnswer(tgId, question, newAnswer)
   } catch (e) {
-    if (e instanceof AppError) {
+    if (e instanceof CustomError) {
       return ctx.reply(e.message)
     }
     throw e

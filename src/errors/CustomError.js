@@ -1,4 +1,4 @@
-class RequestError extends Error {
+class CustomError extends Error {
   constructor(message) {
     super()
     this.message = message
@@ -6,4 +6,4 @@ class RequestError extends Error {
   }
 }
 
-module.exports = RequestError
+module.exports = CustomError
