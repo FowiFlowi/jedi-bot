@@ -1,6 +1,6 @@
 const userService = require('../service/user')
 const directionService = require('../service/direction')
-const getRequestMessage = require('../utils/getRequestMessage')
+const getMessage = require('../utils/getMessage')
 const { approveActionTrigger } = require('../utils/regexpCollection')
 
 module.exports = bot => {
@@ -16,6 +16,9 @@ module.exports = bot => {
     if (!request) {
       return ctx.answerCbQuery('This request is already approved')
     }
+    if (request.disabled) {
+      return ctx.answerCbQuery('This request is already disabled by mentor')
+    }
 
     const dbDirection = await directionService.upsert(request.answers.direction)
     Object.assign(request, {
@@ -27,7 +30,7 @@ module.exports = bot => {
       $set: { mentorRequests: user.mentorRequests },
       $addToSet: { directions: { id: dbDirection._id, ...request.answers } },
     }
-    const { text } = getRequestMessage(user, request, ctx.state.user)
+    const { text } = getMessage.newRequest(user, request, ctx.state.user)
     const tasks = [
       ctx.answerCbQuery('<3'),
       ctx.editMessageText(text),

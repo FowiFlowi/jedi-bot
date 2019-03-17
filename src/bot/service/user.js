@@ -8,7 +8,7 @@ const bot = require('../')
 const db = require('../../db')
 const directionService = require('./direction')
 const extractUsername = require('../utils/extractUsername')
-const getRequestMessage = require('../utils/getRequestMessage')
+const getMessage = require('../utils/getMessage')
 const regexpCollection = require('../utils/regexpCollection')
 const { bot: errors } = require('../../errors')
 
@@ -19,6 +19,7 @@ const { bot: errors } = require('../../errors')
 // TODO: add statistic
 // TODO: add "became mentor" for students
 // TODO: add logging request time
+// TOOD: change logging/error loggin logic
 
 Object.assign(service, {
   get(query = {}) {
@@ -101,6 +102,24 @@ Object.assign(service, {
     const modifier = { $pull: { directions: { id: directionId } } }
     return db.collection('users').updateMany({}, modifier)
   },
+  async removeDirection(tgId, directionId) {
+    const query = { tgId }
+    const modifier = { $pull: { directions: { id: directionId } } }
+    const queryOps = { returnOriginal: false }
+    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    return value
+  },
+  async disableMentorRequest(tgId, directionName) {
+    const query = {
+      tgId,
+      mentorRequests: { $elemMatch: { 'answers.direction': directionName, disabled: { $ne: true } } },
+    }
+    const modifier = { $set: { 'mentorRequests.$.disabled': true } }
+    const queryOps = { returnOriginal: false }
+    const { value: user } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    await service.notifyRequestDisabling(user, directionName)
+    return user
+  },
   async getMentorsByDirections(directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {
       const query = {
@@ -136,7 +155,7 @@ Object.assign(service, {
     const fullAnswers = { linkedin, timeAmount, ...request.answers }
     const formattedAnswers = Object.entries(fullAnswers)
       .filter(([question]) => question !== 'direction')
-      .reduce((text, [question, answer]) => text + `<b>${map[question]}</b>\n${answer}\n`, '')
+      .reduce((text, [question, answer]) => text + `<b>${map[question]}</b>: ${answer}\n`, '')
     return `${extractUsername(mentor)}\n${formattedAnswers}`
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {
@@ -174,10 +193,14 @@ Object.assign(service, {
     return newRequestMsgId
   },
   async notifyNewRequest(user, request) {
-    const { text, keyboard } = getRequestMessage(user, request)
+    const { text, keyboard } = getMessage.newRequest(user, request)
     const { message_id: messageId } = await bot.telegram
       .sendMessage(config.adminChatId, text, keyboard)
     return messageId
+  },
+  notifyRequestDisabling(user, directionName) {
+    const message = `${extractUsername(user)} has disabled his request with ${directionName} direction`
+    return bot.telegram.sendMessage(config.adminChatId, message)
   },
   async notifyRequestApprove(tgId, direction) {
     const message = `Єєє <b>${direction}</b>! Чекай на перших студентів`
@@ -201,7 +224,7 @@ Object.assign(service, {
       return errors.noRequestQuestion()
     }
     request.answers[question] = newAsnwer
-    const { text, keyboard } = getRequestMessage(user, request)
+    const { text, keyboard } = getMessage.newRequest(user, request)
     return Promise.all([
       service.update(tgId, { mentorRequests: user.mentorRequests }),
       bot.telegram.editMessageText(
@@ -212,5 +235,10 @@ Object.assign(service, {
         keyboard,
       ),
     ])
+  },
+  extractUnapprovedList(mentorRequests) {
+    return mentorRequests.filter(request => !request.approved && !request.disabled)
+      .map((request, indx) => `${indx + 1}. <code>${request.answers.direction}</code>`)
+      .join('\n')
   },
 })

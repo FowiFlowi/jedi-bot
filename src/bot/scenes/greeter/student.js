@@ -3,27 +3,11 @@ const env = require('node-env-manager')
 
 const Scene = require('../../utils/scene')
 const userService = require('../../service/user')
-const chooseDirectionHandler = require('../../utils/chooseDirectionHandler')
 
 const scene = new Scene(config.scenes.greeter.student)
 
-scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
-
-scene.hears(config.buttons.back, ctx => {
-  ctx.state.sceneMessage = 'Спробуй ще'
-  ctx.scene.enter(config.scenes.greeter.self)
-})
-
-scene.on('text', async ctx => {
-  const num = parseInt(ctx.message.text, 10)
-  const direction = ctx.scene.state.directions[num - 1]
-  if (!direction) {
-    return ctx.reply('Щось не той номер. Спробуй ще')
-  }
-  const data = {
-    directions: [{ id: direction._id }],
-    roles: [config.roles.student],
-  }
+scene.enter(async ctx => {
+  const data = { roles: [config.roles.student] }
   if (env.isDev()) {
     data.roles.push(config.roles.developer)
   }

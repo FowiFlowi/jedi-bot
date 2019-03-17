@@ -27,6 +27,9 @@ scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor, roles.studen
     return false
   })
 
+scene.hears(buttons.home.mentor.removeDirection, protect(roles.mentor),
+  async ctx => ctx.scene.enter(scenes.home.removeMentorDirection))
+
 scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.student), async ctx => {
   const { directions = [], roles: userRoles, mentorRequests } = ctx.state.user
   const ids = directions.map(item => item.id)
@@ -36,11 +39,7 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.studen
     return ctx.replyWithHTML(list || messageIfEmpty)
   }
 
-  const unapproved = mentorRequests
-    .filter(request => request.approved === false)
-    .map((request, indx) => `${indx + 1}. <code>${request.answers.direction}</code>`)
-    .join('\n')
-
+  const unapproved = userService.extractUnapprovedList(mentorRequests)
   let answer = ''
   if (list.length) {
     answer += `<b>Підтвердженні направлення:</b>\n${list}`
@@ -54,11 +53,7 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor, roles.studen
 scene.hears(buttons.home.mentor.mentors, protect(roles.mentor),
   async ctx => ctx.scene.enter(scenes.home.otherMentors))
 
-scene.hears(buttons.home.student.mentors, protect(roles.student), async ctx => {
-  const text = await userService.getMentorsByDirections(ctx.state.user.directions, { format: true })
-  const messageIfEmpty = 'По твоїх направленнях поки немає менторів, але вони незабаром прийдуть.\n'
-    + 'Спробуй додати інших направлень'
-  return ctx.replyWithHTML(text || messageIfEmpty)
-})
+scene.hears(buttons.home.student.searchMentors, protect(roles.student),
+  async ctx => ctx.scene.enter(scenes.home.searchMentors))
 
 module.exports = scene

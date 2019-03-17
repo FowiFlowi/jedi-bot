@@ -9,7 +9,8 @@ const sceneMessage = 'Тут можеш додати ще направлень, 
 
 const scene = new WizardScene(config.scenes.home.addMentorDirection,
   ctx => {
-    const unapprovedRequest = ctx.state.user.mentorRequests.find(req => !req.approved)
+    const unapprovedRequest = ctx.state.user.mentorRequests
+      .find(req => !req.approved && !req.disabled)
     if (unapprovedRequest) {
       const { direction } = unapprovedRequest.answers
       return ctx.home(`Спочатку дочекайся підтвердження по цьому направленню:\n<code>${direction}</code>`)
@@ -27,6 +28,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
     }
     const directionName = dbDirection ? dbDirection.name : ctx.message.text.trim()
     const isUserAlreadyHasRequest = ctx.state.user.mentorRequests
+      .filter(req => !req.disabled)
       .reduce((acc, { answers: { direction } }) => acc || direction === directionName, false)
     if (isUserAlreadyHasRequest) {
       return ctx.reply('В тебе вже є запит на це направлення')

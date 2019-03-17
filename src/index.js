@@ -19,9 +19,9 @@ const koaRouter = new KoaRouter()
 app.use(errorHandler)
 app.use(loggerMiddleware)
 app.use(bodyParser())
-app.use(route(koaRouter))
+app.use(route(koaRouter));
 
-!(async () => { // eslint-disable-line
+(async () => {
   logger.info(`ENV:${env.get()}`)
   await db.connect()
   logger.info('Connected to the database')

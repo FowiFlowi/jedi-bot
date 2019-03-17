@@ -29,7 +29,9 @@ module.exports = {
       self: 'home',
       addStudentDirection: 'addStudentDirection',
       addMentorDirection: 'addMentorDirection',
+      removeMentorDirection: 'removeMentorDirection',
       otherMentors: 'otherMentors',
+      searchMentors: 'searchMentors',
     },
   },
   roles: {
