@@ -7,7 +7,7 @@ const userService = require('../../service/user')
 const scene = new Scene(config.scenes.greeter.student)
 
 scene.enter(async ctx => {
-  const data = { roles: [config.roles.student] }
+  const data = { roles: [config.roles.student], directions: [] }
   if (env.isDev()) {
     data.roles.push(config.roles.developer)
   }
