@@ -12,7 +12,7 @@ module.exports = bot => {
       return ctx.answerCbQuery('User has removed')
     }
     const request = user.mentorRequests
-      .find(req => req.answers.direction === direction && !req.approved)
+      .find(req => req.answers.direction === direction && !req.approved && !req.disabled)
     if (!request) {
       return ctx.answerCbQuery('This request is already approved')
     }
@@ -28,7 +28,7 @@ module.exports = bot => {
     })
     const modifer = {
       $set: { mentorRequests: user.mentorRequests },
-      $addToSet: { directions: { id: dbDirection._id, ...request.answers } },
+      $addToSet: { directions: { id: dbDirection._id } },
     }
     const { text } = getMessage.newRequest(user, request, ctx.state.user)
     const tasks = [

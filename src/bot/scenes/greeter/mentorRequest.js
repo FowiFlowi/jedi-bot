@@ -74,7 +74,8 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     if (env.isDev()) {
       data.roles.push(roles.developer)
     }
-    ctx.state.user = await userService.update(ctx.from.id, data)
+    const ops = { unset: { directions: 1 } }
+    ctx.state.user = await userService.update(ctx.from.id, data, ops)
     return ctx.home('Готово. Залишилось дочекатись підтвердження від адміністраторів. Вони от-от тобі напишуть')
   })
 

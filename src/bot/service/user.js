@@ -89,6 +89,9 @@ Object.assign(service, {
     const query = { tgId: +tgId }
     const modifier = ops.disableSetWrapper ? data : { $set: data }
     modifier.$currentDate = { lastModified: true }
+    if (ops.unset) {
+      modifier.$unset = ops.unset
+    }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
     return value

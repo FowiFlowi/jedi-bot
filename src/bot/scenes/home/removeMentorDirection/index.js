@@ -35,14 +35,15 @@ scene.hears(config.buttons.back, ctx => ctx.home('Так, це була не н�
 scene.on('text', async ctx => {
   const name = ctx.message.text.trim()
   const { directions, mentorRequests } = ctx.scene.state
-  const direction = directions.find(item => item.direction === name)
+  const direction = await directionService.getByName(name)
+  const isUserHasDirection = directions.find(({ id }) => id.equals(direction._id))
   const mentorRequest = mentorRequests.find(req => req.answers.direction === name)
-  if (!direction && !mentorRequest) {
+  if (!isUserHasDirection && !mentorRequest) {
     return ctx.reply('У тебе немає запитів по цьому направленню')
   }
   const tasks = [userService.disableMentorRequest(ctx.state.user.tgId, name)]
   if (direction) {
-    tasks.push(userService.removeDirection(ctx.state.user.tgId, direction.id))
+    tasks.push(userService.removeDirection(ctx.state.user.tgId, direction._id))
   }
   await Promise.all(tasks)
   return ctx.home('Видалено')

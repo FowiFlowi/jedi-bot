@@ -9,16 +9,13 @@ module.exports = {
   home: {
     student: {
       searchMentors: '🔍 Знайти менторів',
-      // addDirection: '📚 Додати направлення',
-      // myDirections: '📜 Мої направлення',
-      // becomeMentor: '🚀 Стати ментором',
+      becomeMentor: '🚀 Стати ментором',
     },
     mentor: {
       addDirection: '📚 Додати направлення',
       removeDirection: '🗑️ Видалити направлення',
       myDirections: '📜 Мої направлення',
-      mentors: '🔍 Подивитись на інших менторів',
-      // becomeStudent: '🔭 Стати студентом',
+      mentors: '🔍 Інші ментори',
     },
     admin: {
 
