@@ -16,10 +16,8 @@ scene.enter(ctx => {
   return ctx.replyWithHTML(ctx.state.homeMessage, keyboard)
 })
 
-scene.hears(buttons.home.student.becomeMentor, protect(roles.student), ctx => {
-  const sceneName = scenes.greeter.mentorRequest
-  return ctx.scene.enter(sceneName)
-})
+scene.hears(buttons.home.student.becomeMentor, protect(roles.student),
+  ctx => ctx.scene.enter(scenes.greeter.mentorRequest, { upgrade: true }))
 
 scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor, roles.student),
   ctx => {

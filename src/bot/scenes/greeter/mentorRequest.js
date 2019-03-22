@@ -9,7 +9,9 @@ const chooseDirectionHandler = require('../../utils/chooseDirectionHandler')
 
 const backHandler = ctx => {
   ctx.state.sceneMessage = 'Спробуй ще разок'
-  return ctx.scene.enter(scenes.greeter.self)
+  return ctx.scene.state.upgrade
+    ? ctx.home('Іншим разом')
+    : ctx.scene.enter(scenes.greeter.self)
 }
 
 const stepHandler = (question, answerProperty) => {
