@@ -30,9 +30,9 @@ const stepHandler = (question, answerProperty) => {
   return composer
 }
 
-const sceneMessage = 'Аби стати ментором, тобі знадобиться заповнити коротку анкету'
-  + '\n\nПерше питання: <b>котре направлення ти хочеш менторити?</b>\n'
-  + 'Вибери порядковий номер або запропонуй світ варіант'
+const sceneMessage = 'У ментора має бути профіль в LinkedIn, аби студентам було легше орієнтуватись '
+  + 'Тож радимо перевірити актуальність своєї сторінки.\n\n'
+  + 'Нам важливо, щоб відповіді на питання були українською мовою, адже це мова інтерфейсу KPI Mentor Bot.'
 
 const scene = new WizardScene(scenes.greeter.mentorRequest,
   chooseDirectionHandler(sceneMessage),
