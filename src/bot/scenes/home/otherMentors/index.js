@@ -8,7 +8,7 @@ const scene = new WizardScene(config.scenes.home.otherMentors,
   chooseDirectionHandler('Вибери порядковий номер направлення', { hasMentors: true }),
   async ctx => {
     if (ctx.message.text === config.buttons.back) {
-      return ctx.home('Оке')
+      return ctx.home('👌')
     }
     const num = parseInt(ctx.message.text, 10)
     const direction = ctx.scene.state.directions[num - 1]

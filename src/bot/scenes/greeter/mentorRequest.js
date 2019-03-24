@@ -1,4 +1,6 @@
-const { scenes, roles, buttons } = require('config')
+const {
+  scenes, roles, buttons, messages: { mentorQuestions },
+} = require('config')
 const env = require('node-env-manager')
 const WizardScene = require('telegraf/scenes/wizard')
 const Composer = require('telegraf/composer')
@@ -14,7 +16,7 @@ const backHandler = ctx => {
     : ctx.scene.enter(scenes.greeter.self)
 }
 
-const stepHandler = (question, answerProperty) => {
+const stepHandler = question => {
   const composer = new Composer(sceneBaseHandler)
 
   composer.hears(buttons.back, backHandler)
@@ -23,18 +25,15 @@ const stepHandler = (question, answerProperty) => {
     const answer = ctx.message.text.trim()
     const { answerProperty: prevAnswerProp } = ctx.scene.state
     ctx.scene.state.answers[prevAnswerProp] = answer
-    ctx.scene.state.answerProperty = answerProperty
-    ctx.replyWithHTML(question)
+    ctx.scene.state.answerProperty = question
+    ctx.replyWithHTML(mentorQuestions[question])
     return ctx.wizard.next()
   })
   return composer
 }
 
-const sceneMessage = 'Чудово!\nКотре направлення ти б хотів менторити?\n'
-  + 'Вибери порядковий номер або запропонуй свій варіант'
-
 const scene = new WizardScene(scenes.greeter.mentorRequest,
-  chooseDirectionHandler(sceneMessage),
+  chooseDirectionHandler(mentorQuestions.direction),
   async ctx => {
     if (ctx.message.text === buttons.back) {
       return backHandler(ctx)
@@ -47,17 +46,14 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     ctx.scene.state.answers = {
       direction: dbDirection ? dbDirection.name : ctx.message.text.trim(),
     }
-    const text = 'Ще одне: мені важливо, аби відповіді на питання були українскьою, '
-      + 'адже це мова мого інтерфейсу\n\n<b>Який у тебе досвід?</b>'
-    ctx.replyWithHTML(text)
+    ctx.replyWithHTML(mentorQuestions.experience)
     ctx.scene.state.answerProperty = 'experience'
     return ctx.wizard.next()
   },
-  stepHandler('<b>Скільки годин на день плануєш виділяти на менторство?</b>', 'timeAmount'),
-  stepHandler('<b>Маєш можливість зустрічатись офлайн?</b>', 'offline'),
-  stepHandler('<b>Місто</b>', 'city'),
-  stepHandler('У ментора повинен бути профіль в LinkedIn, аби студентам було легше орієнтуватись. '
-    + 'Тож радимо перевірити актуальність своєї сторінки\n\n<b>Посилання на linkedin</b>', 'linkedin'),
+  stepHandler('timeAmount'),
+  stepHandler('offline'),
+  stepHandler('city'),
+  stepHandler('linkedin'),
   async ctx => {
     if (ctx.message.text === buttons.back) {
       return backHandler(ctx)
