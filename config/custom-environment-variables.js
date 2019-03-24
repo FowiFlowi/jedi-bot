@@ -4,4 +4,7 @@ module.exports = {
     url: 'MONGO_URL',
   },
   port: 'PORT',
+  telegraph: {
+    accessToken: 'TELEGRAPH_ACCESS_TOKEN',
+  },
 }

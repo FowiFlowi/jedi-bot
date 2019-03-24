@@ -3,5 +3,4 @@ module.exports = from => from && ({
   firstName: from.first_name,
   lastName: from.last_name,
   username: from.username,
-  languageCode: from.language_code,
 })

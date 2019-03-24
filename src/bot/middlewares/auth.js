@@ -11,19 +11,24 @@ module.exports = async (ctx, next) => {
     ctx.reply(`Hey guys, text me privately, please: @${username}`)
     return ctx.leaveChat(ctx.chat.id)
   }
+  if (!ctx.from) {
+    return false
+  }
   const { user, updated } = await userService.upsert(mapFromUser(ctx.from))
   if (user.roles && user.roles.includes(config.roles.mentor) && !user.username) {
     return ctx.replyWithHTML(config.messages.shouldMentorUsername)
   }
-  ctx.state.user = user
-  if (!updated && (ctx.message && ctx.message.text && !ctx.message.text.match(/^\/start/))) {
+  if (!updated && !(ctx.message && ctx.message.text && ctx.message.text.startsWith('/start'))) {
     ctx.state.sceneName = config.scenes.greeter.self
   }
-  if (!env.isDev()) {
+  if (ctx.callbackQuery) {
     return next()
   }
-  if (ctx.from && await settingsService.checkAcl(ctx.from.id)) {
-    return next()
+  if (!ctx.message || !ctx.message.text) {
+    return false
   }
-  return false
+  ctx.state.user = user
+  return env.isDev()
+    ? await settingsService.checkAcl(ctx.from.id) && next()
+    : next()
 }

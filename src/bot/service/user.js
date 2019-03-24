@@ -10,20 +10,32 @@ const directionService = require('./direction')
 const extractUsername = require('../utils/extractUsername')
 const getMessage = require('../utils/getMessage')
 const regexpCollection = require('../utils/regexpCollection')
+const createMentorsPage = require('../utils/createMentorsPage')
+const mapFromUser = require('../utils/mapFromUser')
 const { bot: errors } = require('../../errors')
 
+const { requestQuestionsMap: questionsMap } = config
+
 // TODO: add notifications about new users to another users
-// TODO: generate lists to Telegra.ph (search mentors!)
 // TODO: add FAQ/info button
 // TODO: mark users that started with "Search mentor" but stopped (no desired direction)
 // TODO: add statistic
-// TODO: add "became mentor" for students
 // TODO: add logging request time
 // TOOD: change logging/error loggin logic
 
 Object.assign(service, {
-  get(query = {}) {
-    return db.collection('users').find(query).toArray()
+  async get(query = {}) {
+    const users = await db.collection('users').find(query).toArray()
+    const updateTasks = users
+      .filter(user => user.roles && user.roles.includes(config.roles.mentor)
+        && user.lastModified < (new Date() - config.timeBeforeUserUpdate))
+      .map(async user => {
+        const info = mapFromUser(await bot.telegram.getChat(user.tgId))
+        Object.assign(user, info)
+        return service.upsert(info)
+      })
+    await Promise.all(updateTasks)
+    return users
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
@@ -70,9 +82,10 @@ Object.assign(service, {
     }
     return service.formatUsers(users)
   },
-  getOne(queryOrTgId) {
+  async getOne(queryOrTgId) {
     const query = queryOrTgId instanceof Object ? queryOrTgId : { tgId: +queryOrTgId }
-    return db.collection('users').findOne(query)
+    const [user] = await service.get(query)
+    return user
   },
   async upsert(user) {
     if (!user) {
@@ -130,7 +143,7 @@ Object.assign(service, {
         roles: config.roles.mentor,
       }
       const [mentors, direction] = await Promise.all([
-        db.collection('users').find(query).toArray(),
+        service.get(query),
         directionService.getOne(directionId),
       ])
       if (!mentors.length) {
@@ -142,24 +155,28 @@ Object.assign(service, {
     if (!ops.format) {
       return mentorsByDirections
     }
-    return mentorsByDirections
-      .map(({ direction, mentors }) => {
-        let text = `<b>${direction.name}</b>\n`
-        mentors.forEach((mentor, i) => text += `${i + 1}. ${service.getMentorInfo(mentor, direction)}`)
-        return text
-      })
-      .join('\n')
+    return mentorsByDirections.length > 10
+      ? createMentorsPage(mentorsByDirections)
+      : mentorsByDirections
+        .map(({ direction, mentors }) => mentors.reduce((text, mentor, i) => {
+          const num = `${i + 1}. `
+          const info = service.getMentorInfo(mentor.mentorRequests, direction, { format: true })
+          return text + `${num}${extractUsername(mentor)}${info}`
+        }, `<b>${direction.name}</b>\n`))
+        .join('\n')
   },
-  getMentorInfo(mentor, direction) {
-    const request = mentor.mentorRequests
+  getMentorInfo(mentorRequests, direction, ops = {}) {
+    const request = mentorRequests
       .find(req => req.directionId.toString() === direction._id.toString())
-    const { answers: { linkedin, timeAmount } } = mentor.mentorRequests[0]
-    const { requestQuestionsMap: map } = config
-    const fullAnswers = { linkedin, timeAmount, ...request.answers }
-    const formattedAnswers = Object.entries(fullAnswers)
+    const { answers: { linkedin, timeAmount } } = mentorRequests[0]
+    const answers = { linkedin, timeAmount, ...request.answers }
+    if (!ops.format) {
+      return answers
+    }
+    const formattedAnswers = Object.entries(answers)
       .filter(([question]) => question !== 'direction')
-      .reduce((text, [question, answer]) => text + `<b>${map[question]}</b>: ${answer}\n`, '')
-    return `${extractUsername(mentor)}\n${formattedAnswers}`
+      .reduce((text, [question, answer]) => text + `<b>${questionsMap[question]}</b>: ${answer}\n`, '\n')
+    return formattedAnswers
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {

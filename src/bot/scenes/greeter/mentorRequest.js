@@ -30,9 +30,8 @@ const stepHandler = (question, answerProperty) => {
   return composer
 }
 
-const sceneMessage = 'У ментора має бути профіль в LinkedIn, аби студентам було легше орієнтуватись '
-  + 'Тож радимо перевірити актуальність своєї сторінки.\n\n'
-  + 'Нам важливо, щоб відповіді на питання були українською мовою, адже це мова інтерфейсу KPI Mentor Bot.'
+const sceneMessage = 'Чудово!\nКотре направлення ти б хотів менторити?\n'
+  + 'Вибери порядковий номер або запропонуй свій варіант'
 
 const scene = new WizardScene(scenes.greeter.mentorRequest,
   chooseDirectionHandler(sceneMessage),
@@ -48,14 +47,17 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     ctx.scene.state.answers = {
       direction: dbDirection ? dbDirection.name : ctx.message.text.trim(),
     }
-    ctx.replyWithHTML('<b>Який у тебе досвід?</b>')
+    const text = 'Ще одне: мені важливо, аби відповіді на питання були українскьою, '
+      + 'адже це мова мого інтерфейсу\n\n<b>Який у тебе досвід?</b>'
+    ctx.replyWithHTML(text)
     ctx.scene.state.answerProperty = 'experience'
     return ctx.wizard.next()
   },
   stepHandler('<b>Скільки годин на день плануєш виділяти на менторство?</b>', 'timeAmount'),
   stepHandler('<b>Маєш можливість зустрічатись офлайн?</b>', 'offline'),
   stepHandler('<b>Місто</b>', 'city'),
-  stepHandler('<b>Посилання на linkedin</b>', 'linkedin'),
+  stepHandler('У ментора повинен бути профіль в LinkedIn, аби студентам було легше орієнтуватись. '
+    + 'Тож радимо перевірити актуальність своєї сторінки\n\n<b>Посилання на linkedin</b>', 'linkedin'),
   async ctx => {
     if (ctx.message.text === buttons.back) {
       return backHandler(ctx)
@@ -78,7 +80,7 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     }
     const ops = { unset: { directions: 1 } }
     ctx.state.user = await userService.update(ctx.from.id, data, ops)
-    return ctx.home('Готово. Залишилось дочекатись підтвердження від адміністраторів. Вони от-от тобі напишуть')
+    return ctx.home('Готово!\nЗалишилось дочекатись підтвердження від адміністраторів. Я от-от тебе сповіщу про це')
   })
 
 module.exports = scene
