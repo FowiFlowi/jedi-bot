@@ -50,7 +50,7 @@ module.exports = {
   requestQuestionsMap: {
     direction: 'Направлення',
     experience: 'Досвід',
-    timeAmount: 'Кількість менторських годин на день',
+    timeAmount: 'Кількість менторських годин на тиждень',
     linkedin: 'Linkedin',
     offline: 'Можливість офлайн зустрічей',
     city: 'Місто',

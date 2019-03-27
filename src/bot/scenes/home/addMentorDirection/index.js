@@ -5,7 +5,7 @@ const chooseDirectionHandler = require('../../../utils/chooseDirectionHandler')
 const userService = require('../../../service/user')
 
 const sceneMessage = 'Тут можеш додати ще направлень, котрі ти б хотів менторити. '
-  + 'Вибери порядковий номер зі списку, або запропонуй свій варіант та дочекайся підтвердження'
+  + 'Вибери порядковий номер зі списку або запропонуй свій варіант та дочекайся підтвердження'
 
 const scene = new WizardScene(config.scenes.home.addMentorDirection,
   ctx => {
@@ -36,7 +36,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
     ctx.scene.state.answers = {
       direction: directionName,
     }
-    ctx.replyWithHTML('<b>Який у тебе досвід?</b>')
+    ctx.replyWithHTML('<b>Кілька речень про твій досвід</b>')
     return ctx.wizard.next()
   },
   async ctx => {

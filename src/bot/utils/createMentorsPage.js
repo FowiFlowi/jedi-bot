@@ -34,7 +34,7 @@ module.exports = async mentorsByDirections => {
     const mentorsNode = { tag: 'ol', children: [] }
     item.mentors.forEach(mentor => {
       const children = getMentorNode(mentor, item.direction)
-      mentorsNode.children.push({ tag: 'il', children })
+      mentorsNode.children.push({ tag: 'li', children })
     })
     content.push(mentorsNode)
   })

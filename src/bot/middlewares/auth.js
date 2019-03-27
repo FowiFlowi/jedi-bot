@@ -21,13 +21,13 @@ module.exports = async (ctx, next) => {
   if (!updated && !(ctx.message && ctx.message.text && ctx.message.text.startsWith('/start'))) {
     ctx.state.sceneName = config.scenes.greeter.self
   }
+  ctx.state.user = user
   if (ctx.callbackQuery) {
     return next()
   }
   if (!ctx.message || !ctx.message.text) {
     return false
   }
-  ctx.state.user = user
   return env.isDev()
     ? await settingsService.checkAcl(ctx.from.id) && next()
     : next()

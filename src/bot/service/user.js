@@ -12,6 +12,7 @@ const getMessage = require('../utils/getMessage')
 const regexpCollection = require('../utils/regexpCollection')
 const createMentorsPage = require('../utils/createMentorsPage')
 const mapFromUser = require('../utils/mapFromUser')
+const combineAnswers = require('../utils/combineAnswers')
 const { bot: errors } = require('../../errors')
 
 const { requestQuestionsMap: questionsMap } = config
@@ -22,6 +23,8 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: add statistic
 // TODO: add logging request time
 // TOOD: change logging/error loggin logic
+// TODO: Animation for rejecting request
+// TODO: Images for request questions
 
 Object.assign(service, {
   async get(query = {}) {
@@ -155,7 +158,8 @@ Object.assign(service, {
     if (!ops.format) {
       return mentorsByDirections
     }
-    return mentorsByDirections.length > 10
+    const mentorsCount = mentorsByDirections.reduce((sum, item) => sum + item.mentors.length, 0)
+    return mentorsCount > 7
       ? createMentorsPage(mentorsByDirections)
       : mentorsByDirections
         .map(({ direction, mentors }) => mentors.reduce((text, mentor, i) => {
@@ -207,7 +211,8 @@ Object.assign(service, {
       .join('\n')
   },
   async addMentorRequest(user, request) {
-    const newRequestMsgId = await service.notifyNewRequest(user, request)
+    const newRequest = { ...request, answers: combineAnswers(user, request) }
+    const newRequestMsgId = await service.notifyNewRequest(user, newRequest)
     const modifier = { $addToSet: { mentorRequests: { ...request, newRequestMsgId } } }
     await service.update(user.tgId, modifier, { disableSetWrapper: true })
     return newRequestMsgId
@@ -223,9 +228,13 @@ Object.assign(service, {
     return bot.telegram.sendMessage(config.adminChatId, message)
   },
   async notifyRequestApprove(tgId, direction) {
-    const message = `Єєє <b>${direction}</b>! Чекай на перших студентів`
+    const message = `Єєє <b>${direction}</b>! Чекай на перших падаванів`
     await bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
     return bot.telegram.sendAnimation(tgId, config.videos.requestApproved)
+  },
+  async notifyRequestReject(tgId, direction) {
+    const message = `На жаль, твій запит по направленню <b>${direction}</b> був відхилений :c`
+    return bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
   },
   addDirection(tgId, directionId) {
     const modifier = { $addToSet: { directions: { id: directionId } } }
@@ -236,15 +245,22 @@ Object.assign(service, {
     if (!user) {
       return errors.noUsers()
     }
-    const request = user.mentorRequests.find(req => !req.approved)
+    const [mainRequest] = user.mentorRequests
+    const request = user.mentorRequests.find(req => !req.approved && !req.disabled)
     if (!request) {
       return errors.noUnapprovedRequest()
     }
-    if (!request.answers[question]) {
+    if (!request.answers[question] && !mainRequest.answers[question]) {
       return errors.noRequestQuestion()
     }
-    request.answers[question] = newAsnwer
-    const { text, keyboard } = getMessage.newRequest(user, request)
+    if (request.answers[question]) {
+      request.answers[question] = newAsnwer
+    } else {
+      mainRequest.answers[question] = newAsnwer
+    }
+    const answers = { ...mainRequest.answers, ...request.answers }
+    const newRequest = { ...request, answers }
+    const { text, keyboard } = getMessage.newRequest(user, newRequest)
     return Promise.all([
       service.update(tgId, { mentorRequests: user.mentorRequests }),
       bot.telegram.editMessageText(
