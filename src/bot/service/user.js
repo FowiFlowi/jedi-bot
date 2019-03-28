@@ -159,7 +159,7 @@ Object.assign(service, {
       return mentorsByDirections
     }
     const mentorsCount = mentorsByDirections.reduce((sum, item) => sum + item.mentors.length, 0)
-    return mentorsCount > 7
+    return mentorsCount > config.mentorsTelegraphRateLimit
       ? createMentorsPage(mentorsByDirections)
       : mentorsByDirections
         .map(({ direction, mentors }) => mentors.reduce((text, mentor, i) => {

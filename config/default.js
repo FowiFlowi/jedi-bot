@@ -57,4 +57,5 @@ module.exports = {
   },
   adminChatId: -322323327,
   timeBeforeUserUpdate: 1000 * 60 * 60, // 1 hour
+  mentorsTelegraphRateLimit: 2,
 }
