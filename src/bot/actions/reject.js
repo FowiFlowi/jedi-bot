@@ -1,5 +1,6 @@
 const userService = require('../service/user')
 const getMessage = require('../utils/getMessage')
+const combineAnswers = require('../utils/combineAnswers')
 
 module.exports = async ctx => {
   const { data } = ctx.callbackQuery
@@ -16,7 +17,9 @@ module.exports = async ctx => {
 
   request.disabled = true
   const modifer = { $set: { mentorRequests: user.mentorRequests } }
-  const { text } = getMessage.rejectRequest(user, request, ctx.state.user)
+
+  const rejectedRequest = { ...request, answers: combineAnswers(user, request) }
+  const { text } = getMessage.rejectRequest(user, rejectedRequest, ctx.state.user)
   const tasks = [
     ctx.answerCbQuery('<3'),
     ctx.editMessageText(text),

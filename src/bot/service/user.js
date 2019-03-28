@@ -165,15 +165,25 @@ Object.assign(service, {
         .map(({ direction, mentors }) => mentors.reduce((text, mentor, i) => {
           const num = `${i + 1}. `
           const info = service.getMentorInfo(mentor.mentorRequests, direction, { format: true })
-          return text + `${num}${extractUsername(mentor)}${info}`
+          return text + `${num}${extractUsername(mentor)}${info}\n`
         }, `<b>${direction.name}</b>\n`))
         .join('\n')
   },
   getMentorInfo(mentorRequests, direction, ops = {}) {
     const request = mentorRequests
+      .filter(req => req.directionId)
       .find(req => req.directionId.toString() === direction._id.toString())
-    const { answers: { linkedin, timeAmount } } = mentorRequests[0]
-    const answers = { linkedin, timeAmount, ...request.answers }
+    const {
+      answers: {
+        linkedin,
+        timeAmount,
+        city,
+        offline,
+      },
+    } = mentorRequests[0]
+    const answers = {
+      linkedin, timeAmount, city, offline, ...request.answers,
+    }
     if (!ops.format) {
       return answers
     }

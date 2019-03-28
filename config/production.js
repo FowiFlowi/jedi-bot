@@ -1,3 +1,3 @@
 module.exports = {
-  mentorsTelegraphRateLimit: 9,
+  mentorsTelegraphRateLimit: 5,
 }
