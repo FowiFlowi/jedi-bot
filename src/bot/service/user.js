@@ -13,6 +13,7 @@ const regexpCollection = require('../utils/regexpCollection')
 const createMentorsPage = require('../utils/createMentorsPage')
 const mapFromUser = require('../utils/mapFromUser')
 const combineAnswers = require('../utils/combineAnswers')
+const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
 const { requestQuestionsMap: questionsMap } = config
@@ -22,22 +23,27 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: mark users that started with "Search mentor" but stopped (no desired direction)
 // TODO: add statistic
 // TODO: add logging request time
-// TOOD: change logging/error loggin logic
 // TODO: Animation for rejecting request
 // TODO: Images for request questions
 
 Object.assign(service, {
   async get(query = {}) {
     const users = await db.collection('users').find(query).toArray()
-    const updateTasks = users
-      .filter(user => user.roles && user.roles.includes(config.roles.mentor)
-        && user.lastModified < (new Date() - config.timeBeforeUserUpdate))
-      .map(async user => {
-        const info = mapFromUser(await bot.telegram.getChat(user.tgId))
-        Object.assign(user, info)
-        return service.upsert(info)
-      })
-    await Promise.all(updateTasks)
+    return service.refreshUsersInfoAsync(users)
+  },
+  refreshUsersInfoAsync(users) {
+    users.forEach(user => {
+      const isMentor = user.roles && user.roles.includes(config.roles.mentor)
+      const isTimeToUpdate = user.lastModified < (new Date() - config.timeBeforeUserUpdate)
+      if (isMentor && isTimeToUpdate) {
+        bot.telegram.getChat(user.tgId)
+          .then(info => service.upsert(mapFromUser(info)))
+          .catch(e => {
+            logger.error(e)
+            bot.telegram.sendMessage(config.creatorId, `Refresh mentor Error: ${e.message}\n${e.stack}`)
+          })
+      }
+    })
     return users
   },
   async getByRole(role, ops = {}) {

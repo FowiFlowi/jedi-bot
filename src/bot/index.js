@@ -19,5 +19,5 @@ bot.use(scenes)
 
 bot.catch(e => {
   logger.error(e)
-  bot.telegram.sendMessage(config.creatorId, `Error: ${e.message}\n${JSON.stringify(e.stack)}`)
+  bot.telegram.sendMessage(config.creatorId, `Error: ${e.message}\n${e.stack}`)
 })

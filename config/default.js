@@ -8,6 +8,7 @@ module.exports = {
   logger: {
     level: process.env.LOG_LEVEL || 'debug',
   },
+  port: 1898,
   buttons,
   commands: {
     start: 'start',
@@ -58,4 +59,7 @@ module.exports = {
   adminChatId: -322323327,
   timeBeforeUserUpdate: 1000 * 60 * 60, // 1 hour
   mentorsTelegraphRateLimit: 2,
+  telegraph: {
+    accessToken: '4a8eed2038e1c93064c6a6818f917f027564455ba12699d6b9cf7d57349d',
+  },
 }
