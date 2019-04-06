@@ -51,7 +51,6 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     return ctx.wizard.next()
   },
   stepHandler('timeAmount'),
-  stepHandler('offline'),
   stepHandler('city'),
   stepHandler('linkedin'),
   async ctx => {

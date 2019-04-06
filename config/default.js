@@ -53,7 +53,6 @@ module.exports = {
     experience: 'Досвід',
     timeAmount: 'Кількість менторських годин на тиждень',
     linkedin: 'Linkedin',
-    offline: 'Можливість офлайн зустрічей',
     city: 'Місто',
   },
   adminChatId: -322323327,

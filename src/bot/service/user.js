@@ -184,11 +184,10 @@ Object.assign(service, {
         linkedin,
         timeAmount,
         city,
-        offline,
       },
     } = mentorRequests[0]
     const answers = {
-      linkedin, timeAmount, city, offline, ...request.answers,
+      linkedin, timeAmount, city, ...request.answers,
     }
     if (!ops.format) {
       return answers
