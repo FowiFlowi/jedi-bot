@@ -22,9 +22,7 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: add FAQ/info button
 // TODO: mark users that started with "Search mentor" but stopped (no desired direction)
 // TODO: add statistic
-// TODO: add logging request time
 // TODO: Animation for rejecting request
-// TODO: Images for request questions
 
 Object.assign(service, {
   async get(query = {}) {
