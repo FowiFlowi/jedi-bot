@@ -4,6 +4,7 @@ const logger = require('../../utils/logger')
 
 module.exports = async (ctx, next) => {
   try {
+    ctx.state.requestStartTime = new Date()
     await next()
   } catch (e) {
     logger.error(e)
