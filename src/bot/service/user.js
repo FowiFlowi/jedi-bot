@@ -27,8 +27,11 @@ const { requestQuestionsMap: questionsMap } = config
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
-    const { skip = 0 } = listOptions
-    const users = await db.collection('users').find(query).skip(skip).toArray()
+    const { skip = 0, limit = 0 } = listOptions
+    const users = await db.collection('users').find(query)
+      .skip(skip)
+      .limit(limit)
+      .toArray()
     return service.refreshUsersInfoAsync(users)
   },
   refreshUsersInfoAsync(users) {
@@ -48,7 +51,7 @@ Object.assign(service, {
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
-    const listOptions = { skip: ops.skip }
+    const listOptions = { skip: ops.skip, limit: ops.limit }
     const users = await service.get(query, listOptions)
     if (!ops.format) {
       return users
@@ -102,7 +105,6 @@ Object.assign(service, {
       query.roles = ops.role
     }
     const [user] = await service.get(query)
-    console.log('TCL: getByUsername -> user', user)
     if (!user) {
       errors.noUsers()
     }

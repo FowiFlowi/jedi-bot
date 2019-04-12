@@ -33,15 +33,8 @@ async function getByDirectionOrUsername(param) {
 module.exports = [commands.students, protect.chat(), async ctx => {
   let [, param] = ctx.message.text.split(' ')
   if (!param || param.match(/^skip=\d+/)) {
-    let skip = 50
-    if (param) {
-      const [, skipString] = param.split('=')
-      skip = Number(skipString)
-    }
-    if (skip > 50) {
-      skip = 50
-    }
-    return ctx.reply(await userService.getStudents({ format: true, skip }) || 'empty')
+    const skip = param ? Number(param.split('=')[1]) : 0
+    return ctx.reply(await userService.getStudents({ format: true, skip, limit: 50 }) || 'empty')
   }
   param = param.trim()
   return regexpCollection.tgId.test(param)
