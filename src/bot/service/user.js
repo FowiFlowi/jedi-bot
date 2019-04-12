@@ -23,10 +23,12 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: mark users that started with "Search mentor" but stopped (no desired direction)
 // TODO: add statistic
 // TODO: Animation for rejecting request
+// TODO: Connect als
 
 Object.assign(service, {
-  async get(query = {}) {
-    const users = await db.collection('users').find(query).toArray()
+  async get(query = {}, listOptions = {}) {
+    const { skip = 0 } = listOptions
+    const users = await db.collection('users').find(query).skip(skip).toArray()
     return service.refreshUsersInfoAsync(users)
   },
   refreshUsersInfoAsync(users) {
@@ -46,7 +48,8 @@ Object.assign(service, {
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
-    const users = await service.get(query)
+    const listOptions = { skip: ops.skip }
+    const users = await service.get(query, listOptions)
     if (!ops.format) {
       return users
     }
@@ -62,8 +65,7 @@ Object.assign(service, {
     return service.getByRole(config.roles.student, ops)
   },
   getOneByDirection(id, ops = {}) {
-    ops.getOne = true // eslint-disable-line no-param-reassign
-    return service.getByDirection(id, ops)
+    return service.getByDirection(id, { ...ops, getOne: true })
   },
   async getByDirection(id, ops = {}) {
     if (!regexpCollection.mongoId.test(id)) {
@@ -93,6 +95,21 @@ Object.assign(service, {
     const query = queryOrTgId instanceof Object ? queryOrTgId : { tgId: +queryOrTgId }
     const [user] = await service.get(query)
     return user
+  },
+  async getByUsername(username, ops = {}) {
+    const query = { username }
+    if (ops.role) {
+      query.roles = ops.role
+    }
+    const [user] = await service.get(query)
+    console.log('TCL: getByUsername -> user', user)
+    if (!user) {
+      errors.noUsers()
+    }
+    if (!ops.format) {
+      return user
+    }
+    return service.formatUsers([user])
   },
   async upsert(user) {
     if (!user) {

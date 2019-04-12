@@ -28,15 +28,12 @@ async function getUserInfo(tgId) {
   return answer
 }
 
-async function getByDirection(directionName) {
-  try {
-    return await userService.getByDirection(directionName, { role: roles.mentor, format: true })
-  } catch (e) {
-    if (e instanceof CustomError) {
-      return e.message
-    }
-    throw e
-  }
+async function getByDirectionOrUsername(param) {
+  return userService.getByDirection(param, { role: roles.mentor, format: true })
+    .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))
+    .then(byDirectionResult => byDirectionResult
+      || userService.getByUsername(param, { role: roles.mentor, format: true }))
+    .catch(e => e instanceof CustomError ? e.message : Promise.reject(e))
 }
 
 module.exports = [commands.mentors, protect.chat(), async ctx => {
@@ -47,5 +44,5 @@ module.exports = [commands.mentors, protect.chat(), async ctx => {
   param = param.trim()
   return regexpCollection.tgId.test(param)
     ? ctx.replyWithHTML(await getUserInfo(param))
-    : ctx.replyWithHTML(await getByDirection(param))
+    : ctx.replyWithHTML(await getByDirectionOrUsername(param))
 }]
