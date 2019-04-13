@@ -46,7 +46,7 @@ module.exports = {
   videos: {
     greeter: 'CgADAgAD_QIAAjscYUuD5hvdecqz5wI',
     error: 'CgADAgAD0QIAAjscYUuI6wfWXlxwsgI',
-    requestApproved: 'AAQCABO98lEPAARkh20taD6WW35tAAIC',
+    requestApproved: 'CgADAgAD6gIAAjscYUvRtvwPaPwk3QI',
   },
   requestQuestionsMap: {
     direction: 'Направлення',
