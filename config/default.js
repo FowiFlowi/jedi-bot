@@ -44,9 +44,9 @@ module.exports = {
   messages,
   creatorId: 147615474,
   videos: {
-    greeter: 'CgADAgAD_QIAAjscYUuiYbFLYLXa0AI',
-    error: 'CgADAgAD0QIAAjscYUsW1kAJkbXB0wI',
-    requestApproved: 'CgADAgAD6gIAAjscYUuOL36KSbKjKgI',
+    greeter: 'CgADAgAD_QIAAjscYUuD5hvdecqz5wI',
+    error: 'CgADAgAD0QIAAjscYUuI6wfWXlxwsgI',
+    requestApproved: 'AAQCABO98lEPAARkh20taD6WW35tAAIC',
   },
   requestQuestionsMap: {
     direction: 'Направлення',

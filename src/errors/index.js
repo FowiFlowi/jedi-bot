@@ -20,10 +20,10 @@ module.exports = {
     noDirection(msg = 'No direction was found') {
       throw new CustomError(msg)
     },
-    noUsers(msg = 'No users was found') {
+    noUsers(msg = 'No users were found') {
       throw new CustomError(msg)
     },
-    noUnapprovedRequest(msg = 'No unapproved requests was found') {
+    noUnapprovedRequest(msg = 'No unapproved requests were found') {
       throw new CustomError(msg)
     },
     noRequestQuestion(msg = 'No request question was found') {
