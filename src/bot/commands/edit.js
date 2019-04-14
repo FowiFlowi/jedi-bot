@@ -6,7 +6,8 @@ const CustomError = require('../../errors/CustomError')
 
 module.exports = [commands.edit, protect.chat(), async ctx => {
   const params = ctx.message.text.split(' ')
-  const [, tgId, question, newAnswer] = params.map(param => param.trim())
+  const [, tgId, question, ...newAnswerArray] = params.map(param => param.trim())
+  const newAnswer = newAnswerArray.join(' ')
   if (!tgId || !question || !newAnswer) {
     return ctx.reply('Usage example: /edit 123123 direction C++')
   }
