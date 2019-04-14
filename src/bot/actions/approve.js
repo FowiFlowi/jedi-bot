@@ -31,7 +31,7 @@ module.exports = async ctx => {
   const { text } = getMessage.newRequest(user, request, ctx.state.user)
   const tasks = [
     ctx.answerCbQuery('<3'),
-    ctx.editMessageText(text),
+    ctx.editMessageText(text, { parse_mode: 'HTML' }),
     userService.notifyRequestApprove(tgId, direction),
     userService.update(tgId, modifer, { disableSetWrapper: true }),
   ]

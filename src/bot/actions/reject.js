@@ -22,7 +22,7 @@ module.exports = async ctx => {
   const { text } = getMessage.rejectRequest(user, rejectedRequest, ctx.state.user)
   const tasks = [
     ctx.answerCbQuery('<3'),
-    ctx.editMessageText(text),
+    ctx.editMessageText(text, { parse_mode: 'HTML' }),
     userService.notifyRequestReject(tgId, direction),
     userService.update(tgId, modifer, { disableSetWrapper: true }),
   ]
