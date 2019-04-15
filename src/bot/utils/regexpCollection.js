@@ -1,6 +1,6 @@
 module.exports = {
-  tgId: /^\d{5,9}$/,
+  tgId: /^\d+$/,
   mongoId: /^(?=(?:.{12}|.{24})$)[0-9a-fA-F]*$/,
-  approveActionTrigger: /^approve\|\d{5,9}\|.+$/,
-  rejectActionTrigger: /^reject\|\d{5,9}\|.+$/,
+  approveActionTrigger: /^approve\|\d+\|.+$/,
+  rejectActionTrigger: /^reject\|\d+\|.+$/,
 }
