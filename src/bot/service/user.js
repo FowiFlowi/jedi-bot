@@ -181,8 +181,8 @@ Object.assign(service, {
     if (!ops.format) {
       return mentorsByDirections
     }
-    // const mentorsCount = mentorsByDirections.reduce((sum, item) => sum + item.mentors.length, 0)
-    return false // eslint-disable-line
+    const mentorsCount = mentorsByDirections.reduce((sum, item) => sum + item.mentors.length, 0)
+    return mentorsCount > config.mentorsTelegraphRateLimit
       ? createMentorsPage(mentorsByDirections)
       : mentorsByDirections
         .map(({ direction, mentors }) => mentors.reduce((text, mentor, i) => {
