@@ -17,7 +17,7 @@ const scene = new WizardScene(config.scenes.home.otherMentors,
     }
     const ops = { format: true }
     const answer = await userService.getMentorsByDirections([{ id: direction._id }], ops)
-    return ctx.home(answer)
+    return ctx.replyWithHTML(answer)
   })
 
 module.exports = scene
