@@ -7,7 +7,8 @@ const extractUsername = require('../utils/extractUsername')
 const regexpCollection = require('../utils/regexpCollection')
 
 module.exports = [commands.remove, protect.chat(), async ctx => {
-  const [, param] = ctx.message.text.split(' ')
+  const [, ...paramArray] = ctx.message.text.split(' ')
+  const param = paramArray.join(' ')
   if (!param) {
     return ctx.reply('Provide telegram id or direction name to remove docuemnt')
   }
