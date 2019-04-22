@@ -1,3 +1,5 @@
+<img src="./logo.png" alt="MentorBot"/>
+
 # Mentor Bot
 
 [MentorBot](https://t.me/itkpi_mentor_bot) for mentors and students to find each other.
