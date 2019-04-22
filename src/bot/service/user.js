@@ -24,6 +24,9 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: add statistic
 // TODO: Animation for rejecting request
 // TODO: Connect als
+// TODO: Add first and last name to the output
+// TODO: Add count of all users (students/mentors commands) to the output
+// TODO: CHARACTERS ESCAPING
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
