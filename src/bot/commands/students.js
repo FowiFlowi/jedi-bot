@@ -5,6 +5,7 @@ const directionService = require('../service/direction')
 const protect = require('../middlewares/protect')
 const extractUsername = require('../utils/extractUsername')
 const regexpCollection = require('../utils/regexpCollection')
+const escapeHtml = require('../utils/escapeHtml')
 const CustomError = require('../../errors/CustomError')
 
 async function getUserInfo(tgId) {
@@ -18,7 +19,7 @@ async function getUserInfo(tgId) {
   const regTime = student._id.getTimestamp()
   let answer = `${extractUsername(student)}\nRegister date: <b>${regTime.toString().slice(0, 21)}</b>\n`
     + '<b>Directions:</b>\n'
-  dbDirections.forEach((direction, i) => answer += `${i + 1}. ${direction.name}\n`)
+  dbDirections.forEach((direction, i) => answer += `${i + 1}. ${escapeHtml(direction.name)}\n`)
   return answer
 }
 

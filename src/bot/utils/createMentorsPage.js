@@ -13,8 +13,8 @@ function getMentorNode(mentor, direction) {
     .reduce((nodes, [question, answer]) => question === questions.linkedin && answer.startsWith('http')
       ? nodes.concat({ tag: 'a', attrs: { href: answer }, children: ['linkedin\n'] })
       : nodes.concat({ tag: 'b', children: [`${questionsMap[question]}: `] }, `${answer}\n`), [])
-  const username = extractUsername(mentor)
-  if (username.startsWith('@')) {
+  const username = extractUsername(mentor, { escape: false })
+  if (mentor.username) {
     return [{
       tag: 'a',
       attrs: { href: `https://t.me/${mentor.username}` },

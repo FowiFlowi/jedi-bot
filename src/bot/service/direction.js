@@ -6,6 +6,7 @@ module.exports = service
 
 const db = require('../../db')
 const userService = require('./user')
+const escapeHtml = require('../utils/escapeHtml')
 
 Object.assign(service, {
   async get(ops = {}) {
@@ -52,7 +53,7 @@ Object.assign(service, {
   },
   format(directions, ops = {}) {
     return directions.map((item, indx) => {
-      let row = `${indx + 1}. <code>${item.name}</code>`
+      let row = `${indx + 1}. <code>${escapeHtml(item.name)}</code>`
       if (ops.markHasMentors && item.hasMentors) {
         row += '|<b>has mentors</b>'
       }

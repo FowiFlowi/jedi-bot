@@ -1,10 +1,11 @@
 const { Markup } = require('telegraf')
 
 const extractUsername = require('./extractUsername')
+const escapeHtml = require('./escapeHtml')
 
 function getRequestText(user, request) {
   const formattedAnswers = Object.entries(request.answers)
-    .reduce((text, [question, answer], indx) => text + `${indx + 1}. ${question}\n${answer}\n\n`, '')
+    .reduce((text, [question, answer], indx) => text + `${indx + 1}. ${question}\n${escapeHtml(answer)}\n\n`, '')
   let text = `New request from ${extractUsername(user)}:${user.tgId}`
   if (request.isNewDirection) {
     text += ' <b>with new direction</b>'

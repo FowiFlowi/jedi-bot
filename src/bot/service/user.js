@@ -13,6 +13,7 @@ const regexpCollection = require('../utils/regexpCollection')
 const createMentorsPage = require('../utils/createMentorsPage')
 const mapFromUser = require('../utils/mapFromUser')
 const combineAnswers = require('../utils/combineAnswers')
+const escapeHtml = require('../utils/escapeHtml')
 const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
@@ -193,7 +194,7 @@ Object.assign(service, {
           const num = `${i + 1}. `
           const info = service.getMentorInfo(mentor.mentorRequests, direction, { format: true })
           return text + `${num}${extractUsername(mentor)}${info}\n`
-        }, `<b>${direction.name}</b>\n`))
+        }, `<b>${escapeHtml(direction.name)}</b>\n`))
         .join('\n')
   },
   getMentorInfo(mentorRequests, direction, ops = {}) {
@@ -218,7 +219,7 @@ Object.assign(service, {
       .reduce(
         (text, [question, answer]) => text + (question === questions.linkedin && answer.startsWith('http')
           ? `<a href="${answer}">linkedin</a>\n`
-          : `<b>${questionsMap[question]}</b>: ${answer}\n`),
+          : `<b>${questionsMap[question]}</b>: ${escapeHtml(answer)}\n`),
         '\n'
       )
     return formattedAnswers
@@ -242,7 +243,7 @@ Object.assign(service, {
     }
     return studentsByDirections
       .map(({ direction, students }) => {
-        let text = `<b>${direction.name}</b>\n`
+        let text = `<b>${escapeHtml(direction.name)}</b>\n`
         if (!students.length) {
           return `${text}Поки нікого`
         }
@@ -265,16 +266,16 @@ Object.assign(service, {
     return messageId
   },
   notifyRequestDisabling(user, directionName) {
-    const message = `${extractUsername(user)} has disabled his request with ${directionName} direction`
+    const message = `${extractUsername(user)} has disabled his request with ${escapeHtml(directionName)} direction`
     return bot.telegram.sendMessage(config.adminChatId, message)
   },
   async notifyRequestApprove(tgId, direction) {
-    const message = `Єєє <b>${direction}</b>! Чекай на перших падаванів`
+    const message = `Єєє <b>${escapeHtml(direction)}</b>! Чекай на перших падаванів`
     await bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
     return bot.telegram.sendAnimation(tgId, config.videos.requestApproved)
   },
   async notifyRequestReject(tgId, direction) {
-    const message = `На жаль, твій запит по напряму <b>${direction}</b> був відхилений :c`
+    const message = `На жаль, твій запит по напряму <b>${escapeHtml(direction)}</b> був відхилений :c`
     return bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
   },
   addDirection(tgId, directionId) {
@@ -315,7 +316,7 @@ Object.assign(service, {
   },
   extractUnapprovedList(mentorRequests) {
     return mentorRequests.filter(request => !request.approved && !request.disabled)
-      .map((request, indx) => `${indx + 1}. <code>${request.answers.direction}</code>`)
+      .map((request, indx) => `${indx + 1}. <code>${escapeHtml(request.answers.direction)}</code>`)
       .join('\n')
   },
 })
