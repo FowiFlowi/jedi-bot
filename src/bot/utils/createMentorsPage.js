@@ -4,16 +4,15 @@ const telegraph = require('./telegraph')
 const extractUsername = require('./extractUsername')
 const userService = require('../service/user')
 
-const { requestQuestionsMap: questionsMap } = config
+const { requestQuestionsMap: questionsMap, requestQuestions: questions } = config
 
 function getMentorNode(mentor, direction) {
   const mentorInfo = userService.getMentorInfo(mentor.mentorRequests, direction)
   Reflect.deleteProperty(mentorInfo, 'direction')
   const answers = Object.entries(mentorInfo)
-    .reduce((nodes, [question, answer]) => nodes.concat({
-      tag: 'b',
-      children: [`${questionsMap[question]}: `],
-    }, `${answer}\n`), [])
+    .reduce((nodes, [question, answer]) => question === questions.linkedin && answer.startsWith('http')
+      ? nodes.concat({ tag: 'a', attrs: { href: answer }, children: ['linkedin\n'] })
+      : nodes.concat({ tag: 'b', children: [`${questionsMap[question]}: `] }, `${answer}\n`), [])
   const username = extractUsername(mentor)
   if (username.startsWith('@')) {
     return [{

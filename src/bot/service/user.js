@@ -16,7 +16,7 @@ const combineAnswers = require('../utils/combineAnswers')
 const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
-const { requestQuestionsMap: questionsMap } = config
+const { requestQuestionsMap: questionsMap, requestQuestions: questions } = config
 
 // TODO: add notifications about new users to another users
 // TODO: add FAQ/info button
@@ -28,7 +28,6 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: Add count of all users (students/mentors commands) to the output
 // TODO: CHARACTERS ESCAPING (directions + firstName in welcome msg)
 // TODO: validating input messages
-// TODO: Fix linkeding links in telegra.ph pages
 // TOOD: Remove baseScene util
 
 Object.assign(service, {
@@ -217,7 +216,12 @@ Object.assign(service, {
     }
     const formattedAnswers = Object.entries(answers)
       .filter(([question]) => question !== 'direction')
-      .reduce((text, [question, answer]) => text + `<b>${questionsMap[question]}</b>: ${answer}\n`, '\n')
+      .reduce(
+        (text, [question, answer]) => text + (question === questions.linkedin && answer.startsWith('http')
+          ? `<a href="${answer}">linkedin</a>\n`
+          : `<b>${questionsMap[question]}</b>: ${answer}\n`),
+        '\n'
+      )
     return formattedAnswers
   },
   async getStudentsByDirections(mentorTgId, directions, ops = {}) {

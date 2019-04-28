@@ -1,6 +1,14 @@
 const messages = require('./messages')
 const buttons = require('./buttons')
 
+const requestQuestions = {
+  direction: 'direction',
+  experience: 'experience',
+  timeAmount: 'timeAmount',
+  linkedin: 'linkedin',
+  city: 'city',
+}
+
 module.exports = {
   db: {
     name: 'jedi-bot',
@@ -49,12 +57,13 @@ module.exports = {
     requestApproved: 'CgADAgAD6gIAAjscYUvRtvwPaPwk3QI',
   },
   requestQuestionsMap: {
-    direction: 'Напрям',
-    experience: 'Досвід',
-    timeAmount: 'Кількість менторських годин на тиждень',
-    linkedin: 'Linkedin',
-    city: 'Місто',
+    [requestQuestions.direction]: 'Напрям',
+    [requestQuestions.experience]: 'Досвід',
+    [requestQuestions.timeAmount]: 'Кількість менторських годин на тиждень',
+    [requestQuestions.linkedin]: 'Linkedin',
+    [requestQuestions.city]: 'Місто',
   },
+  requestQuestions,
   adminChatId: -322323327,
   timeBeforeUserUpdate: 1000 * 60 * 60, // 1 hour
   mentorsTelegraphRateLimit: 5,
