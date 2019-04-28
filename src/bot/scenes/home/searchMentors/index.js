@@ -5,7 +5,7 @@ const chooseDirectionHandler = require('../../../utils/chooseDirectionHandler')
 const userService = require('../../../service/user')
 
 const scene = new WizardScene(config.scenes.home.searchMentors,
-  chooseDirectionHandler('Вибери порядковий номер направлення', { hasMentors: true }),
+  chooseDirectionHandler('Вибери порядковий номер напряму', { hasMentors: true }),
   async ctx => {
     if (ctx.message.text === config.buttons.back) {
       return ctx.home('👌')

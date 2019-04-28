@@ -49,7 +49,7 @@ module.exports = {
     requestApproved: 'CgADAgAD6gIAAjscYUvRtvwPaPwk3QI',
   },
   requestQuestionsMap: {
-    direction: 'Направлення',
+    direction: 'Напрям',
     experience: 'Досвід',
     timeAmount: 'Кількість менторських годин на тиждень',
     linkedin: 'Linkedin',

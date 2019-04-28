@@ -8,9 +8,9 @@ const chooseDirectionHandler = require('../../../utils/chooseDirectionHandler')
 const scene = new Scene(config.scenes.home.addStudentDirection)
 
 if (env.isDev()) {
-  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:'))
+  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з напрямів:'))
 } else {
-  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з направлень:', { hasMentors: true }))
+  scene.enter(chooseDirectionHandler('Вибери порядковий номер одного з напрямів:', { hasMentors: true }))
 }
 
 scene.hears(config.buttons.back, ctx => ctx.home('Іншим разом'))

@@ -4,7 +4,7 @@ const WizardScene = require('telegraf/scenes/wizard')
 const chooseDirectionHandler = require('../../../utils/chooseDirectionHandler')
 const userService = require('../../../service/user')
 
-const sceneMessage = 'Тут можеш додати ще направлень, котрі ти б хотів менторити. '
+const sceneMessage = 'Тут можеш додати ще напрямів, котрі ти б хотів менторити. '
   + 'Вибери порядковий номер зі списку або запропонуй свій варіант та дочекайся підтвердження'
 
 const scene = new WizardScene(config.scenes.home.addMentorDirection,
@@ -13,7 +13,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
       .find(req => !req.approved && !req.disabled)
     if (unapprovedRequest) {
       const { direction } = unapprovedRequest.answers
-      return ctx.home(`Спочатку дочекайся підтвердження по цьому направленню:\n<code>${direction}</code>`)
+      return ctx.home(`Спочатку дочекайся підтвердження по цьому напряму:\n<code>${direction}</code>`)
     }
     return chooseDirectionHandler(sceneMessage)(ctx)
   },
@@ -31,7 +31,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
       .filter(req => !req.disabled)
       .reduce((acc, { answers: { direction } }) => acc || direction === directionName, false)
     if (isUserAlreadyHasRequest) {
-      return ctx.reply('В тебе вже є запит на це направлення')
+      return ctx.reply('В тебе вже є запит на цей напрям')
     }
     ctx.scene.state.answers = {
       direction: directionName,

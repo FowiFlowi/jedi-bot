@@ -26,7 +26,10 @@ const { requestQuestionsMap: questionsMap } = config
 // TODO: Connect als
 // TODO: Add first and last name to the output
 // TODO: Add count of all users (students/mentors commands) to the output
-// TODO: CHARACTERS ESCAPING
+// TODO: CHARACTERS ESCAPING (directions + firstName in welcome msg)
+// TODO: validating input messages
+// TODO: Fix linkeding links in telegra.ph pages
+// TOOD: Remove baseScene util
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
@@ -268,7 +271,7 @@ Object.assign(service, {
     return bot.telegram.sendAnimation(tgId, config.videos.requestApproved)
   },
   async notifyRequestReject(tgId, direction) {
-    const message = `На жаль, твій запит по направленню <b>${direction}</b> був відхилений :c`
+    const message = `На жаль, твій запит по напряму <b>${direction}</b> був відхилений :c`
     return bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
   },
   addDirection(tgId, directionId) {

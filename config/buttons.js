@@ -12,9 +12,9 @@ module.exports = {
       becomeMentor: '🚀 Стати ментором',
     },
     mentor: {
-      addDirection: '📚 Додати направлення',
-      removeDirection: '🗑️ Видалити направлення',
-      myDirections: '📜 Мої направлення',
+      addDirection: '📚 Додати напрям',
+      removeDirection: '🗑️ Видалити напрям',
+      myDirections: '📜 Мої напрями',
       mentors: '🔍 Інші ментори',
     },
     admin: {

@@ -15,17 +15,17 @@ scene.enter(async ctx => {
 
   let answer = ''
   if (list.length) {
-    answer += `\n\n<b>Підтвердженні направлення:</b>\n${list}`
+    answer += `\n\n<b>Підтвердженні напрями:</b>\n${list}`
   }
   if (unapproved.length) {
-    answer += `\n\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
+    answer += `\n\n<b>Непідтвердженні напрями:</b>\n${unapproved}`
   }
   if (!answer) {
     return ctx.home('У тебе поки немає жодних запитів. Хутчіш додай нових!')
   }
   ctx.scene.state.directions = directions
   ctx.scene.state.mentorRequests = mentorRequests
-  answer = `Напиши повну назву направлення, аби видалити його. Але ще раз подумай, перш ніж зробити це${answer}`
+  answer = `Напиши повну назву напряму, аби видалити його. Але ще раз подумай, перш ніж зробити це${answer}`
   const keyboard = Markup.keyboard([config.buttons.back]).resize().extra()
   return ctx.replyWithHTML(answer, keyboard)
 })
@@ -39,7 +39,7 @@ scene.on('text', async ctx => {
   const isUserHasDirection = directions.find(({ id }) => id.equals(direction._id))
   const mentorRequest = mentorRequests.find(req => req.answers.direction === name)
   if (!isUserHasDirection && !mentorRequest) {
-    return ctx.reply('У тебе немає запитів по цьому направленню')
+    return ctx.reply('У тебе немає запитів по цьому напряму')
   }
   const tasks = [userService.disableMentorRequest(ctx.state.user.tgId, name)]
   if (direction) {

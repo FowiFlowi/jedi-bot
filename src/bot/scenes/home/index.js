@@ -31,12 +31,12 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx =
   const unapproved = userService.extractUnapprovedList(mentorRequests)
   let answer = ''
   if (list.length) {
-    answer += `<b>Підтвердженні направлення:</b>\n${list}`
+    answer += `<b>Підтвердженні напрями:</b>\n${list}`
   }
   if (unapproved.length) {
-    answer += `\n\n<b>Непідтвердженні направлення:</b>\n${unapproved}`
+    answer += `\n\n<b>Непідтвердженні напрями:</b>\n${unapproved}`
   }
-  const messageIfEmpty = 'У тебе намає жодних направлень :c\nСкоріше додай нових!'
+  const messageIfEmpty = 'У тебе намає жодних напрямів :c\nСкоріше додай нових!'
   return ctx.replyWithHTML(answer || messageIfEmpty)
 })
 
@@ -45,5 +45,7 @@ scene.hears(buttons.home.mentor.mentors, protect(roles.mentor),
 
 scene.hears(buttons.home.student.searchMentors, protect(roles.student),
   async ctx => ctx.scene.enter(scenes.home.searchMentors))
+
+scene.on('text', ctx => ctx.home('Скористуйся кнопками'))
 
 module.exports = scene
