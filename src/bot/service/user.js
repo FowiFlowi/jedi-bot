@@ -26,9 +26,10 @@ const { requestQuestionsMap: questionsMap, requestQuestions: questions } = confi
 // TODO: Animation for rejecting request
 // TODO: Connect als
 // TODO: Add count of all users (students/mentors commands) to the output
-// TODO: CHARACTERS ESCAPING (directions + firstName in welcome msg)
 // TODO: validating input messages
 // TOOD: Remove baseScene util
+// TODO: Fix removeDirection (_id of null)
+// TODO: KPI chats
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
@@ -56,12 +57,20 @@ Object.assign(service, {
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
-    const listOptions = { skip: ops.skip, limit: ops.limit }
+    let { skip } = ops
+    if (skip < 0) {
+      skip = 0
+    }
+    const listOptions = { skip, limit: ops.limit }
     const users = await service.get(query, listOptions)
     if (!ops.format) {
       return users
     }
     return service.formatUsers(users)
+  },
+  getCountByRole(role) {
+    const query = { roles: role }
+    return db.collection('users').find(query).count()
   },
   formatUsers(users) {
     return users.map((user, i) => `${i + 1}. ${extractUsername(user)}|${user.tgId}`).join('\n')
@@ -71,6 +80,9 @@ Object.assign(service, {
   },
   getStudents(ops = {}) {
     return service.getByRole(config.roles.student, ops)
+  },
+  getStudentsCount() {
+    return service.getCountByRole(config.roles.student)
   },
   getOneByDirection(id, ops = {}) {
     return service.getByDirection(id, { ...ops, getOne: true })

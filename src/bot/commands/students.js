@@ -38,7 +38,12 @@ module.exports = [commands.students, protect.chat(), async ctx => {
   }
   if (!param || param.startsWith('skip=')) {
     const skip = param ? Number(param.split('=')[1]) : 0
-    return ctx.reply(await userService.getStudents({ format: true, skip, limit: 50 }) || 'empty')
+    const [students, count] = await Promise.all([
+      userService.getStudents({ format: true, skip, limit: 50 }),
+      userService.getStudentsCount(),
+    ])
+    const answer = `${students || 'empty'}\n\nCount: ${count}`
+    return ctx.reply(answer)
   }
   return regexpCollection.tgId.test(param)
     ? ctx.replyWithHTML(await getUserInfo(param))
