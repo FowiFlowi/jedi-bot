@@ -6,13 +6,14 @@ const userService = require('../../../service/user')
 
 const sceneMessage = 'Тут можеш додати ще напрямів, котрі ти б хотів менторити. '
   + 'Вибери порядковий номер зі списку або запропонуй свій варіант та дочекайся підтвердження'
+const { requestStatuses } = config
 
 const scene = new WizardScene(config.scenes.home.addMentorDirection,
   ctx => {
-    const unapprovedRequest = ctx.state.user.mentorRequests
-      .find(req => !req.approved && !req.disabled)
-    if (unapprovedRequest) {
-      const { direction } = unapprovedRequest.answers
+    const initialRequest = ctx.state.user.mentorRequests
+      .find(req => req.status === requestStatuses.initial)
+    if (initialRequest) {
+      const { direction } = initialRequest.answers
       return ctx.home(`Спочатку дочекайся підтвердження по цьому напряму:\n<code>${direction}</code>`)
     }
     return chooseDirectionHandler(sceneMessage)(ctx)
@@ -28,7 +29,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
     }
     const directionName = dbDirection ? dbDirection.name : ctx.message.text.trim()
     const isUserAlreadyHasRequest = ctx.state.user.mentorRequests
-      .filter(req => !req.disabled)
+      .filter(req => [requestStatuses.approved, requestStatuses.paused].includes(req.status))
       .reduce((acc, { answers: { direction } }) => acc || direction === directionName, false)
     if (isUserAlreadyHasRequest) {
       return ctx.reply('В тебе вже є запит на цей напрям')
@@ -45,7 +46,7 @@ const scene = new WizardScene(config.scenes.home.addMentorDirection,
     }
     ctx.scene.state.answers.experience = ctx.message.text.trim()
 
-    const request = { answers: ctx.scene.state.answers, approved: false }
+    const request = { answers: ctx.scene.state.answers, status: config.requestStatuses.initial }
     if (ctx.scene.state.isNewDirection) {
       request.isNewDirection = true
     }

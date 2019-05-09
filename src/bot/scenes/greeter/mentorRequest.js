@@ -1,5 +1,5 @@
 const {
-  scenes, roles, buttons, messages: { mentorQuestions },
+  scenes, roles, buttons, messages: { mentorQuestions }, requestStatuses,
 } = require('config')
 const env = require('node-env-manager')
 const WizardScene = require('telegraf/scenes/wizard')
@@ -60,7 +60,7 @@ const scene = new WizardScene(scenes.greeter.mentorRequest,
     const { answerProperty: prevAnswerProp } = ctx.scene.state
     ctx.scene.state.answers[prevAnswerProp] = ctx.message.text.trim()
 
-    const request = { answers: ctx.scene.state.answers, approved: false }
+    const request = { answers: ctx.scene.state.answers, status: requestStatuses.initial }
     if (ctx.scene.state.isNewDirection) {
       request.isNewDirection = true
     }

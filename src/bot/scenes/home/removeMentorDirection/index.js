@@ -44,7 +44,7 @@ scene.on('text', async ctx => {
   if (!isUserHasDirection && !mentorRequest) {
     return ctx.reply('У тебе немає запитів по цьому напряму')
   }
-  const tasks = [userService.disableMentorRequest(ctx.state.user.tgId, name)]
+  const tasks = [userService.removeMentorRequest(ctx.state.user.tgId, name)]
   if (direction) {
     tasks.push(userService.removeDirection(ctx.state.user.tgId, direction._id))
   }

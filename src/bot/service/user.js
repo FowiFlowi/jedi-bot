@@ -1,4 +1,5 @@
 const config = require('config')
+const { Markup } = require('telegraf')
 
 const service = {}
 
@@ -17,7 +18,7 @@ const escapeHtml = require('../utils/escapeHtml')
 const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
-const { requestQuestionsMap: questionsMap, requestQuestions: questions } = config
+const { requestQuestionsMap: questionsMap, requestQuestions: questions, requestStatuses } = config
 
 // TODO: add notifications about new users to another users
 // TODO: add FAQ/info button
@@ -27,9 +28,8 @@ const { requestQuestionsMap: questionsMap, requestQuestions: questions } = confi
 // TODO: Connect als
 // TODO: validating input messages
 // TOOD: Remove baseScene util
-// TODO: Fix removeDirection (_id of null)
 // TODO: KPI chats
-// TODO: remove nums from removing output
+// TOOD: Pause/Continue directions
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
@@ -172,15 +172,15 @@ Object.assign(service, {
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
     return value
   },
-  async disableMentorRequest(tgId, directionName) {
+  async removeMentorRequest(tgId, directionName) {
     const query = {
       tgId,
-      mentorRequests: { $elemMatch: { 'answers.direction': directionName, disabled: { $ne: true } } },
+      mentorRequests: { $elemMatch: { 'answers.direction': directionName, status: { $ne: requestStatuses.removed } } },
     }
-    const modifier = { $set: { 'mentorRequests.$.disabled': true } }
+    const modifier = { $set: { 'mentorRequests.$.status': requestStatuses.removed } }
     const queryOps = { returnOriginal: false }
     const { value: user } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
-    await service.notifyRequestDisabling(user, directionName)
+    await service.notifyRequestRemoving(user, directionName)
     return user
   },
   async getMentorsByDirections(directions, ops = {}) {
@@ -281,8 +281,8 @@ Object.assign(service, {
       .sendMessage(config.adminChatId, text, keyboard)
     return messageId
   },
-  notifyRequestDisabling(user, directionName) {
-    const message = `${extractUsername(user)} has disabled his request with ${escapeHtml(directionName)} direction`
+  notifyRequestRemoving(user, directionName) {
+    const message = `${extractUsername(user)} has removed his request with ${escapeHtml(directionName)} direction`
     return bot.telegram.sendMessage(config.adminChatId, message)
   },
   async notifyRequestApprove(tgId, direction) {
@@ -304,7 +304,7 @@ Object.assign(service, {
       return errors.noUsers()
     }
     const [mainRequest] = user.mentorRequests
-    const request = user.mentorRequests.find(req => !req.approved && !req.disabled)
+    const request = user.mentorRequests.find(req => req.status === requestStatuses.initial)
     if (!request) {
       return errors.noUnapprovedRequest()
     }
@@ -331,8 +331,17 @@ Object.assign(service, {
     ])
   },
   extractUnapprovedList(mentorRequests) {
-    return mentorRequests.filter(request => !request.approved && !request.disabled)
+    return mentorRequests.filter(request => request.status === requestStatuses.initial)
       .map((request, indx) => `${indx + 1}. <code>${escapeHtml(request.answers.direction)}</code>`)
       .join('\n')
+  },
+  getMentorDirectionMessage(tgId, direction) {
+    const text = `<b>${escapeHtml(direction.name)}</b>`
+    const keyboard = Markup.inlineKeyboard([
+      Markup.callbackButton('Призупинити', `pause|${direction._id}`),
+    ]).extra()
+    keyboard.parse_mode = 'HTML'
+
+    return { text, keyboard }
   },
 })

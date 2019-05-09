@@ -1,3 +1,5 @@
+const config = require('config')
+
 const userService = require('../service/user')
 const directionService = require('../service/direction')
 const getMessage = require('../utils/getMessage')
@@ -9,19 +11,15 @@ module.exports = async ctx => {
   if (!user) {
     return ctx.answerCbQuery('User has removed')
   }
-  const request = user.mentorRequests
-    .find(req => req.answers.direction === direction && !req.approved && !req.disabled)
-  if (!request) {
-    return ctx.answerCbQuery('This request is already approved')
-  }
-  if (request.disabled) {
-    return ctx.answerCbQuery('This request is already disabled by mentor')
+  const request = user.mentorRequests.find(req => req.answers.direction === direction)
+  if (request.status !== config.requestStatuses.initial) {
+    return ctx.answerCbQuery(`This request is already in ${request.status} status`)
   }
 
   const dbDirection = await directionService.upsert(request.answers.direction)
   Object.assign(request, {
     approvedBy: ctx.from.id,
-    approved: true,
+    status: config.requestStatuses.approved,
     directionId: dbDirection._id,
   })
   const modifer = {

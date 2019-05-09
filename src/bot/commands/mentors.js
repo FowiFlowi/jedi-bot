@@ -1,4 +1,4 @@
-const { commands, roles } = require('config')
+const config = require('config')
 
 const userService = require('../service/user')
 const directionService = require('../service/direction')
@@ -6,6 +6,8 @@ const extractUsername = require('../utils/extractUsername')
 const escapeHtml = require('../utils/escapeHtml')
 const getUsersCommand = require('../utils/getUsersCommand')
 const CustomError = require('../../errors/CustomError')
+
+const { commands, roles, requestStatuses } = config
 
 async function getUserInfo(tgId) {
   const mentor = await userService.getOne(tgId)
@@ -20,7 +22,8 @@ async function getUserInfo(tgId) {
     const dbDirections = await directionService.get({ ids: directions.map(item => item.id) })
     dbDirections.forEach((direction, i) => answer += `${i + 1}. ${escapeHtml(direction.name)}\n`)
   }
-  const unapproved = mentor.mentorRequests.filter(request => request.approved !== true)
+  const unapproved = mentor.mentorRequests
+    .filter(request => request.status === requestStatuses.initial)
   if (unapproved.length) {
     answer += '<b>Unapproved directions:</b>\n'
     unapproved.forEach((request, i) => answer += `${i + 1}. ${escapeHtml(request.answers.direction)}\n`)

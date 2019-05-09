@@ -1,3 +1,5 @@
+const config = require('config')
+
 const userService = require('../service/user')
 const getMessage = require('../utils/getMessage')
 const combineAnswers = require('../utils/combineAnswers')
@@ -9,13 +11,12 @@ module.exports = async ctx => {
   if (!user) {
     return ctx.answerCbQuery('User has removed')
   }
-  const request = user.mentorRequests
-    .find(req => req.answers.direction === direction && !req.approved && !req.disabled)
-  if (!request) {
-    return ctx.answerCbQuery('This request is already approved or disabled')
+  const request = user.mentorRequests.find(req => req.answers.direction === direction)
+  if (request.status !== config.requestStatuses.initial) {
+    return ctx.answerCbQuery(`This request is already in ${request.status} status`)
   }
 
-  request.disabled = true
+  request.status = config.requestStatuses.removed
   const modifer = { $set: { mentorRequests: user.mentorRequests } }
 
   const rejectedRequest = { ...request, answers: combineAnswers(user, request) }

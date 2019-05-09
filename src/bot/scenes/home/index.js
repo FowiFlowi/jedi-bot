@@ -27,17 +27,23 @@ scene.hears(buttons.home.mentor.removeDirection, protect(roles.mentor),
 scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx => {
   const { directions = [], mentorRequests } = ctx.state.user
   const ids = directions.map(item => item.id)
-  const list = await directionService.get({ ids, format: true })
-  const unapproved = userService.extractUnapprovedList(mentorRequests)
-  let answer = ''
-  if (list.length) {
-    answer += `<b>Підтвердженні напрями:</b>\n${list}`
+  const approvedDirections = await directionService.get({ ids, format: true })
+  const unapprovedDirections = userService.extractUnapprovedList(mentorRequests)
+  // if (!approvedDirections.length && !unapprovedDirections.length) {
+  //   return ctx.replyWithHTML('У тебе намає жодних напрямів :c\nСкоріше додай нових!')
+  // }
+  if (approvedDirections.length) {
+    ctx.replyWithHTML(approvedDirections)
+    // for (const direction of approvedDirections) { // eslint-disable-line no-restricted-syntax
+    //   const { text, keyboard } = userService.getMentorDirectionMessage(tgId, direction)
+    //   // eslint-disable-next-line no-await-in-loop
+    //   await ctx.reply(text, keyboard)
+    // }
   }
-  if (unapproved.length) {
-    answer += `\n\n<b>Непідтвердженні напрями:</b>\n${unapproved}`
+  if (unapprovedDirections.length) {
+    ctx.replyWithHTML(`\n\n<b>Непідтвердженні напрями:</b>\n${unapprovedDirections}`)
   }
-  const messageIfEmpty = 'У тебе намає жодних напрямів :c\nСкоріше додай нових!'
-  return ctx.replyWithHTML(answer || messageIfEmpty)
+  return true
 })
 
 scene.hears(buttons.home.mentor.mentors, protect(roles.mentor),
