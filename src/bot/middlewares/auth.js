@@ -14,7 +14,8 @@ module.exports = async (ctx, next) => {
   if (!ctx.from) {
     return false
   }
-  const { user, updated } = await userService.upsert(mapFromUser(ctx.from))
+  const userData = { ...mapFromUser(ctx.from), removedBot: false }
+  const { user, updated } = await userService.upsert(userData)
   if (user.roles && user.roles.includes(config.roles.mentor) && !user.username) {
     return ctx.replyWithHTML(config.messages.shouldMentorUsername)
   }

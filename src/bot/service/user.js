@@ -25,11 +25,11 @@ const { requestQuestionsMap: questionsMap, requestQuestions: questions } = confi
 // TODO: add statistic
 // TODO: Animation for rejecting request
 // TODO: Connect als
-// TODO: Add count of all users (students/mentors commands) to the output
 // TODO: validating input messages
 // TOOD: Remove baseScene util
 // TODO: Fix removeDirection (_id of null)
 // TODO: KPI chats
+// TODO: remove nums from removing output
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
@@ -44,12 +44,13 @@ Object.assign(service, {
     users.forEach(user => {
       const isMentor = user.roles && user.roles.includes(config.roles.mentor)
       const isTimeToUpdate = user.lastModified < (new Date() - config.timeBeforeUserUpdate)
-      if (isMentor && isTimeToUpdate) {
+      if (isMentor && isTimeToUpdate && !user.removedBot) {
         bot.telegram.getChat(user.tgId)
           .then(info => service.upsert(mapFromUser(info)))
           .catch(e => {
             logger.error(e)
-            bot.telegram.sendMessage(config.creatorId, `Refresh mentor Error: ${e.message}\n${e.stack}`)
+            bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${user.tgId} Error: ${e.message}\n${e.stack}`)
+            return service.update(user.tgId, { removedBot: true })
           })
       }
     })
@@ -78,6 +79,9 @@ Object.assign(service, {
   getMentors(ops = {}) {
     return service.getByRole(config.roles.mentor, ops)
   },
+  getMentorsCount() {
+    return service.getCountByRole(config.roles.mentor)
+  },
   getStudents(ops = {}) {
     return service.getByRole(config.roles.student, ops)
   },
@@ -102,7 +106,7 @@ Object.assign(service, {
     if (ops.getOne) {
       return service.getOne(query)
     }
-    const users = await service.get(query)
+    const users = await service.get(query, { skip: ops.skip, limit: ops.limit })
     if (!users.length) {
       errors.noUsers()
     }

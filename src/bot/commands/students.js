@@ -2,10 +2,9 @@ const { commands, roles } = require('config')
 
 const userService = require('../service/user')
 const directionService = require('../service/direction')
-const protect = require('../middlewares/protect')
 const extractUsername = require('../utils/extractUsername')
-const regexpCollection = require('../utils/regexpCollection')
 const escapeHtml = require('../utils/escapeHtml')
+const getUsersCommand = require('../utils/getUsersCommand')
 const CustomError = require('../../errors/CustomError')
 
 async function getUserInfo(tgId) {
@@ -23,29 +22,22 @@ async function getUserInfo(tgId) {
   return answer
 }
 
-async function getByDirectionOrUsername(param) {
-  return userService.getByDirection(param, { role: roles.student, format: true })
+async function getByDirectionOrUsername(param, listOptions) {
+  const { skip, limit } = listOptions
+  return userService.getByDirection(param, {
+    role: roles.student, skip, limit, format: true,
+  })
     .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))
     .then(byDirectionResult => byDirectionResult
       || userService.getByUsername(param, { role: roles.student, format: true }))
     .catch(e => e instanceof CustomError ? e.message : Promise.reject(e))
 }
 
-module.exports = [commands.students, protect.chat(), async ctx => {
-  let [, param] = ctx.message.text.split(' ')
-  if (param) {
-    param = param.trim()
-  }
-  if (!param || param.startsWith('skip=')) {
-    const skip = param ? Number(param.split('=')[1]) : 0
-    const [students, count] = await Promise.all([
-      userService.getStudents({ format: true, skip, limit: 50 }),
-      userService.getStudentsCount(),
-    ])
-    const answer = `${students || 'empty'}\n\nCount: ${count}`
-    return ctx.reply(answer)
-  }
-  return regexpCollection.tgId.test(param)
-    ? ctx.replyWithHTML(await getUserInfo(param))
-    : ctx.replyWithHTML(await getByDirectionOrUsername(param))
-}]
+const handlers = {
+  getUsers: userService.getStudents,
+  getUsersCount: userService.getStudentsCount,
+  getUserInfo,
+  getByDirectionOrUsername,
+}
+
+module.exports = getUsersCommand(commands.students, handlers)
