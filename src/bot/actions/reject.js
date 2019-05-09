@@ -4,6 +4,8 @@ const userService = require('../service/user')
 const getMessage = require('../utils/getMessage')
 const combineAnswers = require('../utils/combineAnswers')
 
+const { requestStatuses } = config
+
 module.exports = async ctx => {
   const { data } = ctx.callbackQuery
   const [, tgId, direction] = data.split('|')
@@ -11,9 +13,10 @@ module.exports = async ctx => {
   if (!user) {
     return ctx.answerCbQuery('User has removed')
   }
-  const request = user.mentorRequests.find(req => req.answers.direction === direction)
-  if (request.status !== config.requestStatuses.initial) {
-    return ctx.answerCbQuery(`This request is already in ${request.status} status`)
+  const request = user.mentorRequests
+    .find(req => req.answers.direction === direction && req.status === requestStatuses.initial)
+  if (!request) {
+    return ctx.answerCbQuery(`No requests by this direction with ${requestStatuses.initial} status`)
   }
 
   request.status = config.requestStatuses.removed
