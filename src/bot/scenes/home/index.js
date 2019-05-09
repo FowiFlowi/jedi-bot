@@ -29,9 +29,9 @@ scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx =
   const ids = directions.map(item => item.id)
   const approvedDirections = await directionService.get({ ids, format: true })
   const unapprovedDirections = userService.extractUnapprovedList(mentorRequests)
-  // if (!approvedDirections.length && !unapprovedDirections.length) {
-  //   return ctx.replyWithHTML('У тебе намає жодних напрямів :c\nСкоріше додай нових!')
-  // }
+  if (!approvedDirections.length && !unapprovedDirections.length) {
+    return ctx.replyWithHTML('У тебе намає жодних напрямів :c\nСкоріше додай нових!')
+  }
   if (approvedDirections.length) {
     ctx.replyWithHTML(approvedDirections)
     // for (const direction of approvedDirections) { // eslint-disable-line no-restricted-syntax
