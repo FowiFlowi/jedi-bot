@@ -40,7 +40,6 @@ async function getByDirectionOrUsername(param, listOptions) {
   })
     .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))
     .then(byDirectionResult => byDirectionResult
-      // || userService.getByUsername(param, { role: roles.mentor, format: true }))
       || getUserInfoByUsername(param))
     .catch(e => e instanceof CustomError ? e.message : Promise.reject(e))
 }

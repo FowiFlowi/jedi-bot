@@ -36,6 +36,9 @@ scene.on('text', async ctx => {
   const name = ctx.message.text.trim()
   const { directions, mentorRequests } = ctx.scene.state
   const direction = await directionService.getByName(name)
+  if (!direction) {
+    return ctx.reply('Цей напрям відсутній. Перевір ще раз')
+  }
   const isUserHasDirection = directions.find(({ id }) => id.equals(direction._id))
   const mentorRequest = mentorRequests.find(req => req.answers.direction === name)
   if (!isUserHasDirection && !mentorRequest) {
