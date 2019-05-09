@@ -22,6 +22,11 @@ async function getUserInfo(tgId) {
   return answer
 }
 
+async function getUserInfoByUsername(username) {
+  const user = await userService.getByUsername(username, { role: roles.student })
+  return getUserInfo(user.tgId)
+}
+
 async function getByDirectionOrUsername(param, listOptions) {
   const { skip, limit } = listOptions
   return userService.getByDirection(param, {
@@ -29,7 +34,7 @@ async function getByDirectionOrUsername(param, listOptions) {
   })
     .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))
     .then(byDirectionResult => byDirectionResult
-      || userService.getByUsername(param, { role: roles.student, format: true }))
+      || getUserInfoByUsername(param))
     .catch(e => e instanceof CustomError ? e.message : Promise.reject(e))
 }
 
