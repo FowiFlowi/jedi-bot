@@ -11,12 +11,12 @@ module.exports = async ctx => {
   const [, tgId, direction] = data.split('|')
   const user = await userService.getOne(tgId)
   if (!user) {
-    return ctx.answerCbQuery('User has removed')
+    return ctx.answerCbQuery('User has removed', true)
   }
   const request = user.mentorRequests
     .find(req => req.answers.direction === direction && req.status === requestStatuses.initial)
   if (!request) {
-    return ctx.answerCbQuery(`No requests by this direction with ${requestStatuses.initial} status`)
+    return ctx.answerCbQuery(`No requests by this direction with ${requestStatuses.initial} status`, true)
   }
 
   request.status = config.requestStatuses.removed

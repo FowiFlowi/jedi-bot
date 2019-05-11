@@ -13,7 +13,6 @@ module.exports = {
     },
     mentor: {
       addDirection: '📚 Додати напрям',
-      removeDirection: '🗑️ Видалити напрям',
       myDirections: '📜 Мої напрями',
       mentors: '🔍 Інші ментори',
     },
@@ -23,4 +22,12 @@ module.exports = {
   },
   back,
   cancel,
+  inline: {
+    pause7days: '⏸️ на тиждень',
+    pause31days: '⏸️ на місяць',
+    continue: '▶️ Продовжити',
+    remove: '🗑️ Видалити',
+    approve: '👍 Approve',
+    reject: '👎 Reject',
+  },
 }

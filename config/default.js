@@ -73,4 +73,13 @@ module.exports = {
     removed: 'removed',
     paused: 'paused',
   },
+  pauseTypes: {
+    pause7days: 'pause7days',
+    pause31days: 'pause31days',
+    continue: 'continue',
+  },
+  pauseTypeToDays: {
+    pause7days: 7,
+    pause31days: 31,
+  },
 }

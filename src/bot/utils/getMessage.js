@@ -1,7 +1,10 @@
+const config = require('config')
 const { Markup } = require('telegraf')
 
 const extractUsername = require('./extractUsername')
 const escapeHtml = require('./escapeHtml')
+
+const { buttons: { inline } } = config
 
 function getRequestText(user, request) {
   const formattedAnswers = Object.entries(request.answers)
@@ -23,8 +26,8 @@ module.exports = {
     }
 
     const keyboard = Markup.inlineKeyboard([
-      Markup.callbackButton('Approve', `approve|${user.tgId}|${request.answers.direction}`),
-      Markup.callbackButton('Reject', `reject|${user.tgId}|${request.answers.direction}`),
+      Markup.callbackButton(inline.approve, `approve|${user.tgId}|${request.answers.direction}`),
+      Markup.callbackButton(inline.reject, `reject|${user.tgId}|${request.answers.direction}`),
     ]).extra()
     keyboard.parse_mode = 'HTML'
 

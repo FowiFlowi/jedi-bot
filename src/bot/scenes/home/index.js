@@ -6,12 +6,14 @@ const Scene = require('../../utils/scene')
 const getKeyboard = require('../../utils/getKeyboard')
 const protect = require('../../middlewares/protect')
 
-const { scenes, buttons, roles } = config
+const {
+  scenes, buttons, roles, requestStatuses,
+} = config
 
 const scene = new Scene(scenes.home.self)
 
 scene.enter(ctx => {
-  const keyboard = getKeyboard(ctx.state.user.roles)
+  const keyboard = getKeyboard.home(ctx.state.user.roles)
   return ctx.replyWithHTML(ctx.state.homeMessage, keyboard)
 })
 
@@ -21,27 +23,25 @@ scene.hears(buttons.home.student.becomeMentor, protect(roles.student),
 scene.hears(buttons.home.mentor.addDirection, protect(roles.mentor),
   ctx => ctx.scene.enter(scenes.home.addMentorDirection))
 
-scene.hears(buttons.home.mentor.removeDirection, protect(roles.mentor),
-  async ctx => ctx.scene.enter(scenes.home.removeMentorDirection))
-
 scene.hears(buttons.home.mentor.myDirections, protect(roles.mentor), async ctx => {
-  const { directions = [], mentorRequests } = ctx.state.user
-  const ids = directions.map(item => item.id)
-  const approvedDirections = await directionService.get({ ids, format: true })
-  const unapprovedDirections = userService.extractUnapprovedList(mentorRequests)
-  if (!approvedDirections.length && !unapprovedDirections.length) {
+  const { mentorRequests } = ctx.state.user
+  const approvedRequests = mentorRequests
+    .filter(req => [requestStatuses.approved, requestStatuses.paused].includes(req.status))
+  const unapprovedRequests = userService.extractUnapprovedList(mentorRequests)
+  if (!approvedRequests.length && !unapprovedRequests.length) {
     return ctx.replyWithHTML('У тебе намає жодних напрямів :c\nСкоріше додай нових!')
   }
-  if (approvedDirections.length) {
-    ctx.replyWithHTML(approvedDirections)
-    // for (const direction of approvedDirections) { // eslint-disable-line no-restricted-syntax
-    //   const { text, keyboard } = userService.getMentorDirectionMessage(tgId, direction)
-    //   // eslint-disable-next-line no-await-in-loop
-    //   await ctx.reply(text, keyboard)
-    // }
+  if (approvedRequests.length) {
+    for (const request of approvedRequests) { // eslint-disable-line no-restricted-syntax
+      /* eslint-disable no-await-in-loop */
+      const direction = await directionService.getOne(request.directionId) //
+      const message = await userService.getMentorDirectionMessage(direction.name, request)
+      await ctx.reply(message.text, message.keyboard)
+      /* eslint-enable no-await-in-loop */
+    }
   }
-  if (unapprovedDirections.length) {
-    ctx.replyWithHTML(`\n\n<b>Непідтвердженні напрями:</b>\n${unapprovedDirections}`)
+  if (unapprovedRequests.length) {
+    ctx.replyWithHTML(`\n\n<b>Непідтвердженні напрями:</b>\n${unapprovedRequests}`)
   }
   return true
 })

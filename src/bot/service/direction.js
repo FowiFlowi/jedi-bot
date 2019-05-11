@@ -1,12 +1,15 @@
-const { roles } = require('config')
+const config = require('config')
+const { ObjectId } = require('mongodb')
 
 const service = {}
 
 module.exports = service
 
+const bot = require('../')
 const db = require('../../db')
 const userService = require('./user')
 const escapeHtml = require('../utils/escapeHtml')
+const logger = require('../../utils/logger')
 
 Object.assign(service, {
   async get(ops = {}) {
@@ -17,17 +20,25 @@ Object.assign(service, {
 
     let list = directions
     if (ops.hasMentors || ops.markHasMentors) {
-      const tasks = directions.map(async direction => {
-        const mentor = await userService.getOneByDirection(direction._id, { role: roles.mentor })
-        return direction.hasMentors = !!mentor // eslint-disable-line no-param-reassign
-      })
-      await Promise.all(tasks)
-      list = ops.hasMentors ? directions.filter(direction => direction.hasMentors === true) : list
+      userService.checkMentorsPausedRequests()
+        .catch(e => {
+          logger.error(e)
+          const msg = `Check paused requests Error: ${e.message}\n${e.stack}`
+          return bot.telegram.sendMessage(config.creatorId, msg)
+        })
+      const tasks = directions.map(async direction => ({
+        ...direction,
+        hasMentors: !!(await userService.isAtLeastOneMentorExistsByDirection(direction._id)),
+      }))
+      const checkedList = await Promise.all(tasks)
+      list = ops.hasMentors
+        ? checkedList.filter(direction => direction.hasMentors === true)
+        : checkedList
     }
     return ops.format ? service.format(list, ops) : list
   },
-  getOne(_id) {
-    return db.collection('directions').findOne({ _id })
+  getOne(id) {
+    return db.collection('directions').findOne({ _id: ObjectId(id) })
   },
   getByName(name) {
     return db.collection('directions').findOne({ name })

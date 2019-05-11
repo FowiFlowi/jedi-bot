@@ -11,7 +11,7 @@ function getMentorNode(mentor, direction) {
   Reflect.deleteProperty(mentorInfo, 'direction')
   const answers = Object.entries(mentorInfo)
     .reduce((nodes, [question, answer]) => question === questions.linkedin && answer.startsWith('http')
-      ? nodes.concat({ tag: 'a', attrs: { href: answer }, children: ['linkedin\n'] })
+      ? nodes.concat({ tag: 'a', attrs: { href: answer }, children: ['Linkedin\n'] })
       : nodes.concat({ tag: 'b', children: [`${questionsMap[question]}: `] }, `${answer}\n`), [])
   const username = extractUsername(mentor, { escape: false })
   if (mentor.username) {

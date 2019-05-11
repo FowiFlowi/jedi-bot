@@ -1,5 +1,6 @@
 const config = require('config')
-const { Markup } = require('telegraf')
+const { ObjectId } = require('mongodb')
+const env = require('node-env-manager')
 
 const service = {}
 
@@ -15,10 +16,15 @@ const createMentorsPage = require('../utils/createMentorsPage')
 const mapFromUser = require('../utils/mapFromUser')
 const combineAnswers = require('../utils/combineAnswers')
 const escapeHtml = require('../utils/escapeHtml')
+const getKeyboard = require('../utils/getKeyboard')
 const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
-const { requestQuestionsMap: questionsMap, requestQuestions: questions, requestStatuses } = config
+const {
+  requestQuestionsMap: questionsMap,
+  requestQuestions: questions,
+  requestStatuses,
+} = config
 
 // TODO: add notifications about new users to another users
 // TODO: add FAQ/info button
@@ -29,7 +35,27 @@ const { requestQuestionsMap: questionsMap, requestQuestions: questions, requestS
 // TODO: validating input messages
 // TOOD: Remove baseScene util
 // TODO: KPI chats
-// TOOD: Pause/Continue directions
+// TODO: fix second+ request notification message after approving/rejecting
+// TODO: enter search mentor directly after register
+// TODO: rename directions to viewedDirections (database)
+// TODO: create readonly mongodb user for admins
+
+function refreshUsersInfoAsync(users) {
+  users.forEach(user => {
+    const isMentor = user.roles && user.roles.includes(config.roles.mentor)
+    const isTimeToUpdate = user.lastModified < (new Date() - config.timeBeforeUserUpdate)
+    if (isMentor && isTimeToUpdate && !user.removedBot) {
+      bot.telegram.getChat(user.tgId)
+        .then(info => service.upsert(mapFromUser(info)))
+        .catch(e => {
+          logger.error(e)
+          bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${user.tgId} Error: ${e.message}\n${e.stack}`)
+          return e.message.includes('chat not found') && service.update(user.tgId, { removedBot: true })
+        })
+    }
+  })
+  return users
+}
 
 Object.assign(service, {
   async get(query = {}, listOptions = {}) {
@@ -38,23 +64,7 @@ Object.assign(service, {
       .skip(skip)
       .limit(limit)
       .toArray()
-    return service.refreshUsersInfoAsync(users)
-  },
-  refreshUsersInfoAsync(users) {
-    users.forEach(user => {
-      const isMentor = user.roles && user.roles.includes(config.roles.mentor)
-      const isTimeToUpdate = user.lastModified < (new Date() - config.timeBeforeUserUpdate)
-      if (isMentor && isTimeToUpdate && !user.removedBot) {
-        bot.telegram.getChat(user.tgId)
-          .then(info => service.upsert(mapFromUser(info)))
-          .catch(e => {
-            logger.error(e)
-            bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${user.tgId} Error: ${e.message}\n${e.stack}`)
-            return service.update(user.tgId, { removedBot: true })
-          })
-      }
-    })
-    return users
+    return refreshUsersInfoAsync(users)
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
@@ -167,26 +177,40 @@ Object.assign(service, {
   },
   async removeDirection(tgId, directionId) {
     const query = { tgId }
-    const modifier = { $pull: { directions: { id: directionId } } }
+    const modifier = { $pull: { directions: { id: ObjectId(directionId) } } }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
     return value
   },
-  async removeMentorRequest(tgId, directionName) {
+  async removeMentorRequest(tgId, directionId) {
     const query = {
       tgId,
-      mentorRequests: { $elemMatch: { 'answers.direction': directionName, status: { $ne: requestStatuses.removed } } },
+      mentorRequests: {
+        $elemMatch: {
+          directionId: ObjectId(directionId),
+          status: { $in: [requestStatuses.approved, requestStatuses.paused] },
+        },
+      },
     }
     const modifier = { $set: { 'mentorRequests.$.status': requestStatuses.removed } }
     const queryOps = { returnOriginal: false }
-    const { value: user } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
-    await service.notifyRequestRemoving(user, directionName)
+    const [direction, updateResult] = await Promise.all([
+      directionService.getOne(directionId),
+      db.collection('users').findOneAndUpdate(query, modifier, queryOps),
+    ])
+    const { value: user } = updateResult
+    await service.notifyRequestRemoving(user, direction.name)
     return user
   },
   async getMentorsByDirections(directions, ops = {}) {
     const tasks = directions.map(async ({ id: directionId }) => {
       const query = {
-        'directions.id': directionId,
+        mentorRequests: {
+          $elemMatch: {
+            directionId,
+            status: requestStatuses.approved,
+          },
+        },
         roles: config.roles.mentor,
       }
       const [mentors, direction] = await Promise.all([
@@ -234,7 +258,7 @@ Object.assign(service, {
       .filter(([question]) => question !== 'direction')
       .reduce(
         (text, [question, answer]) => text + (question === questions.linkedin && answer.startsWith('http')
-          ? `<a href="${answer}">linkedin</a>\n`
+          ? `<a href="${answer}">Linkedin</a>\n`
           : `<b>${questionsMap[question]}</b>: ${escapeHtml(answer)}\n`),
         '\n'
       )
@@ -335,13 +359,82 @@ Object.assign(service, {
       .map((request, indx) => `${indx + 1}. <code>${escapeHtml(request.answers.direction)}</code>`)
       .join('\n')
   },
-  getMentorDirectionMessage(tgId, direction) {
-    const text = `<b>${escapeHtml(direction.name)}</b>`
-    const keyboard = Markup.inlineKeyboard([
-      Markup.callbackButton('Призупинити', `pause|${direction._id}`),
-    ]).extra()
-    keyboard.parse_mode = 'HTML'
+  async getMentorDirectionMessage(directionName, request) {
+    const views = await service.getDirectionViews(request.directionId)
+    const text = `${directionName}\nПерегляди: ${views}`
+    if (request.status === requestStatuses.approved) {
+      return { text, keyboard: getKeyboard.request(request.directionId) }
+    }
+    return { text, keyboard: getKeyboard.pausedRequest(request.directionId) }
+  },
+  async pauseRequest(tgId, request, pauseType) {
+    const pauseUntilDate = new Date()
+    if (env.isDev()) {
+      pauseUntilDate.setMinutes(pauseUntilDate.getMinutes() + 1)
+    } else {
+      const days = config.pauseTypeTo[pauseType]
+      pauseUntilDate.setDate(pauseUntilDate.getDate() + days)
+    }
 
-    return { text, keyboard }
+    const query = {
+      tgId,
+      'mentorRequests.newRequestMsgId': request.newRequestMsgId,
+    }
+    const modifier = {
+      $set: {
+        'mentorRequests.$.status': requestStatuses.paused,
+        'mentorRequests.$.pauseUntil': pauseUntilDate,
+      },
+      $pull: { directions: { id: request.directionId } },
+    }
+    const queryOps = { returnOriginal: false }
+    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    return value
+  },
+  async continueRequest(tgId, request) {
+    const query = {
+      tgId,
+      'mentorRequests.newRequestMsgId': request.newRequestMsgId,
+    }
+    const modifier = {
+      $set: { 'mentorRequests.$.status': requestStatuses.approved },
+      $unset: { 'mentorRequests.$.pauseUntil': 1 },
+      $push: { directions: { id: request.directionId } },
+    }
+    const queryOps = { returnOriginal: false }
+    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    return value
+  },
+  async checkMentorsPausedRequests() {
+    const query = {
+      roles: config.roles.mentor,
+      'mentorRequests.status': requestStatuses.paused,
+    }
+    const modifier = {
+      $set: { 'mentorRequests.$[req].status': requestStatuses.approved },
+      $unset: { 'mentorRequests.$[req].pauseUntil': 1 },
+    }
+    const ops = {
+      arrayFilters: [{ 'req.pauseUntil': { $lte: new Date() }, 'req.status': requestStatuses.paused }],
+    }
+    return db.collection('users').updateMany(query, modifier, ops)
+  },
+  isAtLeastOneMentorExistsByDirection(directionId) {
+    const query = {
+      roles: config.roles.mentor,
+      mentorRequests: {
+        $elemMatch: {
+          directionId,
+          status: requestStatuses.approved,
+        },
+      },
+    }
+    return db.collection('users').findOne(query)
+  },
+  getDirectionViews(directionId) {
+    return db.collection('users').count({
+      roles: config.roles.student,
+      'directions.id': directionId,
+    })
   },
 })
