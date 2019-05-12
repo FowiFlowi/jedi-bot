@@ -23,8 +23,8 @@ module.exports = {
   back,
   cancel,
   inline: {
-    pause7days: '⏸️ на тиждень',
-    pause31days: '⏸️ на місяць',
+    pause7days: '🚫 на тиждень',
+    pause31days: '🚫 на місяць',
     continue: '▶️ Продовжити',
     remove: '🗑️ Видалити',
     approve: '👍 Approve',
