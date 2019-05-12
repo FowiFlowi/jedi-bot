@@ -17,7 +17,9 @@ const scene = new WizardScene(config.scenes.home.otherMentors,
     }
     const ops = { format: true }
     const answer = await userService.getMentorsByDirections([{ id: direction._id }], ops)
-    return ctx.replyWithHTML(answer)
+    return answer
+      ? ctx.replyWithHTML(answer)
+      : ctx.home('Не знайшов жодного ментора. Скоріш за все список оновився, спробуй ще раз')
   })
 
 module.exports = scene

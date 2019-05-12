@@ -22,7 +22,10 @@ const scene = new WizardScene(config.scenes.home.searchMentors,
       answerTask,
       setDirectionTask,
     ])
-    return ctx.replyWithHTML(answer)
+
+    return answer
+      ? ctx.replyWithHTML(answer)
+      : ctx.home('Не знайшов жодного ментора. Скоріш за все список оновився, спробуй ще раз')
   })
 
 module.exports = scene
