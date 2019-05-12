@@ -3,6 +3,7 @@ const { Markup } = require('telegraf')
 
 const extractUsername = require('./extractUsername')
 const escapeHtml = require('./escapeHtml')
+const combineAnswers = require('./combineAnswers')
 
 const { buttons: { inline } } = config
 
@@ -19,22 +20,24 @@ function getRequestText(user, request) {
 
 module.exports = {
   newRequest(user, request, approver) {
-    let text = getRequestText(user, request)
+    const combinedRequest = { ...request, answers: combineAnswers(user, request) }
+    let text = getRequestText(user, combinedRequest)
     if (approver) {
       text += `Approved by ${extractUsername(approver)}`
       return { text }
     }
 
     const keyboard = Markup.inlineKeyboard([
-      Markup.callbackButton(inline.approve, `approve|${user.tgId}|${request.answers.direction}`),
-      Markup.callbackButton(inline.reject, `reject|${user.tgId}|${request.answers.direction}`),
+      Markup.callbackButton(inline.approve, `approve|${user.tgId}|${combinedRequest.answers.direction}`),
+      Markup.callbackButton(inline.reject, `reject|${user.tgId}|${combinedRequest.answers.direction}`),
     ]).extra()
     keyboard.parse_mode = 'HTML'
 
     return { text, keyboard }
   },
   rejectRequest(user, request, rejecter) {
-    const text = getRequestText(user, request)
+    const combinedRequest = { ...request, answers: combineAnswers(user, request) }
+    const text = getRequestText(user, combinedRequest)
     return { text: text + `Rejected by ${extractUsername(rejecter)}` }
   },
 }

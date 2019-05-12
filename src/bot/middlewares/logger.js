@@ -6,10 +6,7 @@ const getSceneLog = (prevSceneName, currentSceneName) => prevSceneName
 
 module.exports = async (ctx, next) => {
   if (ctx.callbackQuery) {
-    console.log({
-      cb: ctx.callbackQuery,
-      user: ctx.state.user,
-    })
+    logger.info(ctx.callbackQuery)
   }
   ctx.state.prevSceneName = ctx.session.__scenes && ctx.session.__scenes.current
   await next()

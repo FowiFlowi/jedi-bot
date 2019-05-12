@@ -36,7 +36,6 @@ const {
 // TOOD: Remove baseScene util
 // TODO: KPI chats
 // TODO: fix second+ request notification message after approving/rejecting
-// TODO: enter search mentor directly after register
 // TODO: rename directions to viewedDirections (database)
 // TOOD: add createdAt field
 
@@ -399,10 +398,59 @@ Object.assign(service, {
     const modifier = {
       $set: { 'mentorRequests.$.status': requestStatuses.approved },
       $unset: { 'mentorRequests.$.pauseUntil': 1 },
-      $push: { directions: { id: request.directionId } },
+      $addToSet: { directions: { id: request.directionId } },
     }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    return value
+  },
+  async approveRequest(approveInfo) {
+    const {
+      mentorTgId,
+      newRequestMsgId,
+      directionName,
+      approver,
+    } = approveInfo
+
+    const direction = await directionService.upsert(directionName)
+    const query = {
+      tgId: Number(mentorTgId),
+      'mentorRequests.newRequestMsgId': newRequestMsgId,
+    }
+    const modifier = {
+      $set: {
+        'mentorRequests.$.status': requestStatuses.approved,
+        'mentorRequests.$.approvedBy': approver,
+        'mentorRequests.$.directionId': direction._id,
+      },
+      $addToSet: { directions: { id: direction._id } },
+    }
+    const queryOps = { returnOriginal: false }
+    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+
+    await service.notifyRequestApprove(mentorTgId, directionName)
+    return value
+  },
+  async rejectRequest(rejectInfo) {
+    const {
+      mentorTgId,
+      newRequestMsgId,
+      directionName,
+      rejecter,
+    } = rejectInfo
+    const query = {
+      tgId: Number(mentorTgId),
+      'mentorRequests.newRequestMsgId': newRequestMsgId,
+    }
+    const modifier = {
+      $set: {
+        'mentorRequests.$.status': requestStatuses.removed,
+        'mentorRequests.$.rejectedBy': rejecter,
+      },
+    }
+    const queryOps = { returnOriginal: false }
+    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
+    await service.notifyRequestReject(mentorTgId, directionName)
     return value
   },
   async checkMentorsPausedRequests() {
