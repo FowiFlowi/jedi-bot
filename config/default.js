@@ -82,4 +82,7 @@ module.exports = {
     pause7days: 7,
     pause31days: 31,
   },
+  chatActions: {
+    typing: 'typing',
+  },
 }

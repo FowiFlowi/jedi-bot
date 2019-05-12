@@ -12,7 +12,7 @@ scene.enter(async ctx => {
     data.roles.push(config.roles.developer)
   }
   ctx.state.user = await userService.update(ctx.from.id, data)
-  return ctx.home('Вже можеш починати шукати менторів. Щасти!')
+  return ctx.scene.enter(config.scenes.home.searchMentors)
 })
 
 module.exports = scene

@@ -5,6 +5,12 @@ const getSceneLog = (prevSceneName, currentSceneName) => prevSceneName
   && (prevSceneName !== currentSceneName ? `[${prevSceneName}->${currentSceneName}]` : `[${currentSceneName}]`)
 
 module.exports = async (ctx, next) => {
+  if (ctx.callbackQuery) {
+    console.log({
+      cb: ctx.callbackQuery,
+      user: ctx.state.user,
+    })
+  }
   ctx.state.prevSceneName = ctx.session.__scenes && ctx.session.__scenes.current
   await next()
   const endTime = new Date()

@@ -38,7 +38,7 @@ const {
 // TODO: fix second+ request notification message after approving/rejecting
 // TODO: enter search mentor directly after register
 // TODO: rename directions to viewedDirections (database)
-// TODO: create readonly mongodb user for admins
+// TOOD: add createdAt field
 
 function refreshUsersInfoAsync(users) {
   users.forEach(user => {
@@ -81,7 +81,7 @@ Object.assign(service, {
   },
   getCountByRole(role) {
     const query = { roles: role }
-    return db.collection('users').find(query).count()
+    return db.collection('users').countDocuments(query)
   },
   formatUsers(users) {
     return users.map((user, i) => `${i + 1}. ${extractUsername(user)}|${user.tgId}`).join('\n')
@@ -372,7 +372,7 @@ Object.assign(service, {
     if (env.isDev()) {
       pauseUntilDate.setMinutes(pauseUntilDate.getMinutes() + 1)
     } else {
-      const days = config.pauseTypeTo[pauseType]
+      const days = config.pauseTypeToDays[pauseType]
       pauseUntilDate.setDate(pauseUntilDate.getDate() + days)
     }
 
@@ -432,7 +432,7 @@ Object.assign(service, {
     return db.collection('users').findOne(query)
   },
   getDirectionViews(directionId) {
-    return db.collection('users').count({
+    return db.collection('users').countDocuments({
       roles: config.roles.student,
       'directions.id': directionId,
     })
