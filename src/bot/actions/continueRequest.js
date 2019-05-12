@@ -29,7 +29,7 @@ module.exports = async ctx => {
     userService.continueRequest(user.tgId, request),
   ])
 
-  const answer = `Тепер твоя інформація по направленню ${direction.name} є доступною.`
+  const answer = `Тепер твоя інформація за напрямом ${direction.name} є доступною.`
   return Promise.all([
     ctx.editMessageText(text, getKeyboard.request(directionId)),
     ctx.answerCbQuery(answer, true),

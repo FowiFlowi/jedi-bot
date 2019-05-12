@@ -30,7 +30,7 @@ module.exports = async ctx => {
     userService.pauseRequest(user.tgId, request, pauseType),
   ])
 
-  const answer = `Готово. Твоя інформація по направленню ${direction.name} не буде доступна ${pauseTypeToDays[pauseType]} днів.`
+  const answer = `Готово. Твоя інформація за напрямом ${direction.name} не буде доступна ${pauseTypeToDays[pauseType]} днів.`
   return Promise.all([
     ctx.editMessageText(text, getKeyboard.pausedRequest(directionId)),
     ctx.answerCbQuery(answer, true),
