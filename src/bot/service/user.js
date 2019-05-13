@@ -149,7 +149,11 @@ Object.assign(service, {
     }
 
     const query = { tgId: user.tgId }
-    const modifier = { $set: user, $currentDate: { lastModified: true } }
+    const modifier = {
+      $set: user,
+      $setOnInsert: { createdAt: new Date() },
+      $currentDate: { lastModified: true },
+    }
     const ops = { upsert: true, returnOriginal: false }
     const response = await db.collection('users').findOneAndUpdate(query, modifier, ops)
     return { user: response.value, updated: response.lastErrorObject.updatedExisting }

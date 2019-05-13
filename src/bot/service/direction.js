@@ -53,7 +53,7 @@ Object.assign(service, {
   },
   async upsert(name) {
     const query = { name }
-    const modifier = { $setOnInsert: { name } }
+    const modifier = { $setOnInsert: { name, createdAt: new Date() } }
     const ops = { upsert: true, returnOriginal: false }
     const { value } = await db.collection('directions').findOneAndUpdate(query, modifier, ops)
     return value
