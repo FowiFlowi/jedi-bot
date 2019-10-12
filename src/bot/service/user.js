@@ -13,11 +13,9 @@ const extractUsername = require('../utils/extractUsername')
 const getMessage = require('../utils/getMessage')
 const regexpCollection = require('../utils/regexpCollection')
 const createMentorsPage = require('../utils/createMentorsPage')
-const mapFromUser = require('../utils/mapFromUser')
 const combineAnswers = require('../utils/combineAnswers')
 const escapeHtml = require('../utils/escapeHtml')
 const getKeyboard = require('../utils/getKeyboard')
-const logger = require('../../utils/logger')
 const { bot: errors } = require('../../errors')
 
 const {
@@ -34,36 +32,19 @@ const {
 // TODO: Connect als
 // TODO: validating input messages
 // TOOD: Remove baseScene util
-// TODO: KPI chats
+// TODO: button for KPI chats
 // TODO: fix second+ request notification message after approving/rejecting
 // TODO: rename directions to viewedDirections (database)
 // TOOD: add createdAt field
-
-function refreshUsersInfoAsync(users) {
-  users.forEach(user => {
-    const isMentor = user.roles && user.roles.includes(config.roles.mentor)
-    const isTimeToUpdate = user.lastModified < (new Date() - config.timeBeforeUserUpdate)
-    if (isMentor && isTimeToUpdate && !user.removedBot) {
-      bot.telegram.getChat(user.tgId)
-        .then(info => service.upsert(mapFromUser(info)))
-        .catch(e => {
-          logger.error(e)
-          bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${user.tgId} Error: ${e.message}\n${e.stack}`)
-          return e.message.includes('chat not found') && service.update(user.tgId, { removedBot: true })
-        })
-    }
-  })
-  return users
-}
+// TODO: autoposting to IT KPI channel
 
 Object.assign(service, {
-  async get(query = {}, listOptions = {}) {
+  get(query = {}, listOptions = {}) {
     const { skip = 0, limit = 0 } = listOptions
-    const users = await db.collection('users').find(query)
+    return db.collection('users').find(query)
       .skip(skip)
       .limit(limit)
       .toArray()
-    return refreshUsersInfoAsync(users)
   },
   async getByRole(role, ops = {}) {
     const query = { roles: role }
