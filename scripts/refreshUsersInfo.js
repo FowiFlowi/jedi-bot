@@ -37,5 +37,4 @@ const BATCH_SIZE = 20;
   const t1 = new Date()
   const updTime = (t1 - t0) / 1000
   console.log(`Update time: ${updTime}sec`)
-  await bot.telegram.sendMessage(config.creatorId, `Refreshed mentors in ${updTime}sec`)
 })()
