@@ -29,7 +29,7 @@ async function getUserInfoByUsername(username) {
 
 async function getByDirectionOrUsername(param, listOptions) {
   const { skip, limit } = listOptions
-  return userService.getByDirection(param, {
+  return userService.getByViewedDirection(param, {
     role: roles.student, skip, limit, format: true,
   })
     .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))

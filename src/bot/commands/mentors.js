@@ -10,7 +10,7 @@ const CustomError = require('../../errors/CustomError')
 const { commands, roles, requestStatuses } = config
 
 async function getUserInfo(tgId) {
-  const mentor = await userService.getOne(tgId)
+  const mentor = await userService.getOne({ tgId: +tgId, roles: roles.mentor })
   if (!mentor) {
     return 'No mentor with such telegram id'
   }
@@ -38,9 +38,7 @@ async function getUserInfoByUsername(username) {
 
 async function getByDirectionOrUsername(param, listOptions) {
   const { skip, limit } = listOptions
-  return userService.getByDirection(param, {
-    role: roles.mentor, skip, limit, format: true,
-  })
+  return userService.getByApprovedDirection(param, { skip, limit, format: true })
     .catch(e => e instanceof CustomError ? undefined : Promise.reject(e))
     .then(byDirectionResult => byDirectionResult
       || getUserInfoByUsername(param))

@@ -11,7 +11,6 @@ const db = require('../../db')
 const directionService = require('./direction')
 const extractUsername = require('../utils/extractUsername')
 const getMessage = require('../utils/getMessage')
-const regexpCollection = require('../utils/regexpCollection')
 const createMentorsPage = require('../utils/createMentorsPage')
 const combineAnswers = require('../utils/combineAnswers')
 const escapeHtml = require('../utils/escapeHtml')
@@ -37,6 +36,7 @@ const {
 // TODO: rename directions to viewedDirections (database)
 // TOOD: add createdAt field
 // TODO: autoposting to IT KPI channel
+// TODO: provide updating mentor info
 
 Object.assign(service, {
   get(query = {}, listOptions = {}) {
@@ -78,23 +78,32 @@ Object.assign(service, {
   getStudentsCount() {
     return service.getCountByRole(config.roles.student)
   },
-  getOneByDirection(id, ops = {}) {
-    return service.getByDirection(id, { ...ops, getOne: true })
-  },
-  async getByDirection(id, ops = {}) {
-    if (!regexpCollection.mongoId.test(id)) {
-      const direction = await directionService.getByName(id)
-      if (!direction) {
-        errors.noDirection()
-      }
-      id = direction._id // eslint-disable-line no-param-reassign
+  async getByApprovedDirection(directionName, ops = {}) {
+    const direction = await directionService.getByName(directionName)
+    const query = {
+      mentorRequests: {
+        $elemMatch: {
+          directionId: direction._id,
+          status: { $in: [requestStatuses.approved, requestStatuses.paused] },
+        },
+      },
     }
-    const query = { 'directions.id': id }
+    const users = await service.get(query, { skip: ops.skip, limit: ops.limit })
+    if (!users.length) {
+      errors.noUsers()
+    }
+    if (!ops.format) {
+      return users
+    }
+    return service.formatUsers(users)
+  },
+  async getByViewedDirection(directionName, ops = {}) {
+    const direction = await directionService.getByName(directionName)
+    const query = {
+      viewedDirections: direction._id,
+    }
     if (ops.role) {
       query.roles = ops.role
-    }
-    if (ops.getOne) {
-      return service.getOne(query)
     }
     const users = await service.get(query, { skip: ops.skip, limit: ops.limit })
     if (!users.length) {
@@ -155,16 +164,16 @@ Object.assign(service, {
     const { value: removedUser } = await db.collection('users').findOneAndDelete(query)
     return removedUser
   },
-  removeDirections(directionId) {
-    const modifier = { $pull: { directions: { id: directionId } } }
-    return db.collection('users').updateMany({}, modifier)
-  },
-  async removeDirection(tgId, directionId) {
-    const query = { tgId }
-    const modifier = { $pull: { directions: { id: ObjectId(directionId) } } }
-    const queryOps = { returnOriginal: false }
-    const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
-    return value
+  removeDirections(id) {
+    const query = {}
+    const modifier = {
+      $set: { 'mentorRequests.$[req].status': requestStatuses.removed },
+      $pull: { viewedDirections: { id } },
+    }
+    const ops = {
+      arrayFilters: [{ 'req.directionId': id }],
+    }
+    return db.collection('users').updateMany(query, modifier, ops)
   },
   async removeMentorRequest(tgId, directionId) {
     const query = {
@@ -248,34 +257,6 @@ Object.assign(service, {
       )
     return formattedAnswers
   },
-  async getStudentsByDirections(mentorTgId, directions, ops = {}) {
-    const tasks = directions.map(async ({ id: directionId }) => {
-      const query = {
-        'directions.id': directionId,
-        'directions.mentorTgId': mentorTgId,
-        roles: config.roles.student,
-      }
-      const [students, direction] = await Promise.all([
-        db.collection('users').find(query).toArray(),
-        directionService.getOne(directionId),
-      ])
-      return { direction, students }
-    })
-    const studentsByDirections = await Promise.all(tasks)
-    if (!ops.format) {
-      return studentsByDirections
-    }
-    return studentsByDirections
-      .map(({ direction, students }) => {
-        let text = `<b>${escapeHtml(direction.name)}</b>\n`
-        if (!students.length) {
-          return `${text}Поки нікого`
-        }
-        students.forEach((student, i) => text += `${i + 1}. ${extractUsername(student)}\n`)
-        return text
-      })
-      .join('\n')
-  },
   async addMentorRequest(user, request) {
     const newRequest = { ...request, answers: combineAnswers(user, request) }
     const newRequestMsgId = await service.notifyNewRequest(user, newRequest)
@@ -302,8 +283,8 @@ Object.assign(service, {
     const message = `На жаль, твій запит по напряму <b>${escapeHtml(direction)}</b> був відхилений :c`
     return bot.telegram.sendMessage(tgId, message, { parse_mode: 'HTML' })
   },
-  addDirection(tgId, directionId) {
-    const modifier = { $addToSet: { directions: { id: directionId } } }
+  addViewedDirection(tgId, directionId) {
+    const modifier = { $addToSet: { viewedDirections: { id: directionId } } }
     return service.update(tgId, modifier, { disableSetWrapper: true })
   },
   async editAnswer(tgId, question, newAsnwer) {
@@ -369,7 +350,6 @@ Object.assign(service, {
         'mentorRequests.$.status': requestStatuses.paused,
         'mentorRequests.$.pauseUntil': pauseUntilDate,
       },
-      $pull: { directions: { id: request.directionId } },
     }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
@@ -383,7 +363,6 @@ Object.assign(service, {
     const modifier = {
       $set: { 'mentorRequests.$.status': requestStatuses.approved },
       $unset: { 'mentorRequests.$.pauseUntil': 1 },
-      $addToSet: { directions: { id: request.directionId } },
     }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
@@ -408,7 +387,6 @@ Object.assign(service, {
         'mentorRequests.$.approvedBy': approver,
         'mentorRequests.$.directionId': direction._id,
       },
-      $addToSet: { directions: { id: direction._id } },
     }
     const queryOps = { returnOriginal: false }
     const { value } = await db.collection('users').findOneAndUpdate(query, modifier, queryOps)
@@ -453,7 +431,7 @@ Object.assign(service, {
   getDirectionViews(directionId) {
     return db.collection('users').countDocuments({
       roles: config.roles.student,
-      'directions.id': directionId,
+      'viewedDirections.id': directionId,
     })
   },
 })

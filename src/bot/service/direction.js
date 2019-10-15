@@ -7,6 +7,7 @@ module.exports = service
 const db = require('../../db')
 const userService = require('./user')
 const escapeHtml = require('../utils/escapeHtml')
+const { bot: errors } = require('../../errors')
 
 Object.assign(service, {
   async get(ops = {}) {
@@ -31,8 +32,12 @@ Object.assign(service, {
   getOne(id) {
     return db.collection('directions').findOne({ _id: ObjectId(id) })
   },
-  getByName(name) {
-    return db.collection('directions').findOne({ name })
+  async getByName(name) {
+    const direction = await db.collection('directions').findOne({ name })
+    if (!direction) {
+      errors.noDirection()
+    }
+    return direction
   },
   async removeByName(name, ops = {}) {
     const query = { name }

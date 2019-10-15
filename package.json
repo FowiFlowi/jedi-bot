@@ -11,7 +11,8 @@
     "dev": "nodemon src | pino-pretty",
     "lint": "eslint .",
     "mocha": "NODE_ENV=test mocha .",
-    "test": "yarn lint && yarn mocha"
+    "test": "yarn lint && yarn mocha",
+    "mongopatch": "mongopatch"
   },
   "dependencies": {
     "async-local-storage": "^2.1.0",
@@ -32,6 +33,7 @@
     "eslint-config-airbnb-base": "^13.1.0",
     "eslint-plugin-import": "^2.16.0",
     "mocha": "^5.2.0",
+    "mongopatch": "^2.0.2",
     "nock": "^10.0.6",
     "pino-pretty": "^2.5.0",
     "pre-commit": "^1.2.2"
