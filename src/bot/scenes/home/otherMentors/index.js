@@ -16,7 +16,13 @@ const scene = new WizardScene(config.scenes.home.otherMentors,
       return ctx.reply('Щось не той номер, спробуй ще разок')
     }
     const ops = { format: true }
-    const answer = await userService.getMentorsByDirections([{ id: direction._id }], ops)
+    const answerTask = userService.getMentorsByDirections([{ id: direction._id }], ops)
+    const setDirectionTask = userService.addViewedDirection(ctx.state.user.tgId, direction._id)
+    const [answer] = await Promise.all([
+      answerTask,
+      setDirectionTask,
+    ])
+
     return answer
       ? ctx.replyWithHTML(answer)
       : ctx.home('Не знайшов жодного ментора. Скоріш за все список оновився, спробуй ще раз')

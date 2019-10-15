@@ -17,7 +17,7 @@ const scene = new WizardScene(config.scenes.home.searchMentors,
     }
     const ops = { format: true }
     const answerTask = userService.getMentorsByDirections([{ id: direction._id }], ops)
-    const setDirectionTask = userService.addDirection(ctx.state.user.tgId, direction._id)
+    const setDirectionTask = userService.addViewedDirection(ctx.state.user.tgId, direction._id)
     const [answer] = await Promise.all([
       answerTask,
       setDirectionTask,
