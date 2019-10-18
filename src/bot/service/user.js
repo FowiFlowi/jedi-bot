@@ -32,7 +32,6 @@ const {
 // TODO: validating input messages
 // TOOD: Remove baseScene util
 // TODO: button for KPI chats
-// TODO: fix second+ request notification message after approving/rejecting
 // TODO: rename directions to viewedDirections (database)
 // TOOD: add createdAt field
 // TODO: autoposting to IT KPI channel

@@ -5,8 +5,15 @@ const settingsService = require('../service/settings')
 const userService = require('../service/user')
 const mapFromUser = require('../utils/mapFromUser')
 
+function shouldLeaveChat(chat) {
+  const isNotPrivateChat = chat.type !== 'private'
+  const isNotAdminChat = chat.id !== config.adminChatId
+  const isNotChannel = chat.type !== 'channel'
+  return isNotPrivateChat && isNotAdminChat && isNotChannel
+}
+
 module.exports = async (ctx, next) => {
-  if (ctx.chat.type !== 'private' && ctx.chat.id !== config.adminChatId) {
+  if (shouldLeaveChat(ctx.chat)) {
     const { username } = await ctx.telegram.getMe()
     ctx.reply(`Hey guys, text me privately, please: @${username}`)
     return ctx.leaveChat(ctx.chat.id)

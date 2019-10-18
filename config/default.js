@@ -8,6 +8,7 @@ const requestQuestions = {
   linkedin: 'linkedin',
   city: 'city',
 }
+const adminChatId = -322323327
 
 module.exports = {
   db: {
@@ -51,6 +52,12 @@ module.exports = {
   },
   messages,
   creatorId: 147615474,
+  adminChatId,
+  reportChannelsId: {
+    adminChat: adminChatId,
+    prod: false,
+    test: -1001225969720,
+  },
   videos: {
     greeter: 'CgADAgAD_QIAAjscYUuD5hvdecqz5wI',
     error: 'CgADAgAD0QIAAjscYUuI6wfWXlxwsgI',
@@ -64,7 +71,6 @@ module.exports = {
     [requestQuestions.city]: 'Місто',
   },
   requestQuestions,
-  adminChatId: -322323327,
   timeBeforeUserUpdate: 1000 * 60 * 60, // 1 hour
   mentorsTelegraphRateLimit: 5,
   requestStatuses: {
