@@ -103,7 +103,7 @@ async function createText(params) {
   } = params
   const studentsAmountDiff = prevStat && studentsAmount - prevStat.studentsAmount
   const mentorsAmountDiff = prevStat && mentorsAmount - prevStat.mentorsAmount
-  let text = `<b>Звіт по менторству за два тижні</b>\n\nКількість студентів: <code>${studentsAmount}`
+  let text = `<b>Інфа по менторству</b>\n\nКількість студентів: <code>${studentsAmount}`
   if (prevStat && studentsAmountDiff > 0) {
     text += `(+${studentsAmountDiff})`
   }
@@ -197,6 +197,7 @@ async function createText(params) {
       db.collection('statistic').insertOne(data),
       bot.telegram.sendMessage(id, text, { parse_mode: 'HTML' }),
     ])
+    await bot.telegram.sendMessage(config.creatorId, 'Created report')
   } catch (e) {
     await bot.telegram.sendMessage(config.creatorId, `IT KPI autopost error: ${e.message}\n${e.stack}`)
   } finally {

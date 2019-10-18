@@ -20,6 +20,7 @@ const { requestStatuses } = config;
       arrayFilters: [{ 'req.pauseUntil': { $lte: new Date() }, 'req.status': requestStatuses.paused }],
     }
     await db.collection('users').updateMany(query, modifier, ops)
+    await bot.telegram.sendMessage(config.creatorId, 'Checked paused requests')
   } catch (e) {
     await bot.telegram.sendMessage(config.creatorId, `Check mentors paused requests error: ${e.message}\n${e.stack}`)
   } finally {

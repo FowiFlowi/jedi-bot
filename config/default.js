@@ -55,7 +55,7 @@ module.exports = {
   adminChatId,
   reportChannelsId: {
     adminChat: adminChatId,
-    prod: false,
+    prod: -1001124190172,
     test: -1001225969720,
   },
   videos: {
