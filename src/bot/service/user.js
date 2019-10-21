@@ -36,6 +36,7 @@ const {
 // TOOD: add createdAt field
 // TODO: autoposting to IT KPI channel
 // TODO: provide updating mentor info
+// TODO: add second message "send another direction number"
 
 Object.assign(service, {
   get(query = {}, listOptions = {}) {
