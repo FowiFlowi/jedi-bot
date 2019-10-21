@@ -1,3 +1,8 @@
+const adminChatId = -271131145
+
 module.exports = {
-  adminChatId: -271131145,
+  adminChatId,
+  reportChannelsId: {
+    adminChat: adminChatId,
+  },
 }

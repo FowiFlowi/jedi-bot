@@ -6,6 +6,7 @@ const bot = require('../src/bot')
 const escapeHtml = require('../src/bot/utils/escapeHtml')
 
 const REPORT_DIRECTIONS_AMOUNT = 15
+const REPORT_CHANNEL = process.env.REPORT_CHANNEL || 'test'
 const pipeline = [
   {
     $facet:
@@ -92,6 +93,13 @@ const sortWithoutPrevStat = directionsViews => (a, b) => {
   return directionViewsA.amount > directionViewsB.amount ? -1 : 1
 }
 
+async function createNewDirectionsText(directions, prevStatDirections) {
+  const newDirections = lodash.differenceWith(directions, prevStatDirections, lodash.isEqual)
+  const newDirectionDocs = await db.collection('directions').find({ _id: { $in: newDirections } })
+  const newDirectionNames = newDirectionDocs.map(doc => escapeHtml(doc.name)).join(', ')
+  return `Нові напрями: <b>${newDirectionNames}</b>\n\n`
+}
+
 async function createText(params) {
   const {
     studentsAmount,
@@ -113,10 +121,7 @@ async function createText(params) {
   }
   text += '</code>\n\n'
   if (prevStat && prevStat.directions.length < directions.length) {
-    const newDirections = lodash.differenceWith(directions, prevStat.directions, lodash.isEqual)
-    const newDirectionDocs = await Promise.all(newDirections.map(dirId => db.collection('directions').findOne(dirId)))
-    const newDirectionNames = newDirectionDocs.map(doc => escapeHtml(doc.name)).join(', ')
-    text += `Нові напрями: <b>${newDirectionNames}</b>\n\n`
+    text += await createNewDirectionsText(directions, prevStat.directions)
   }
   const directionsAmountText = REPORT_DIRECTIONS_AMOUNT > directions.length
     ? `<b>${directions.length}</b> напрямках`
@@ -164,7 +169,7 @@ async function createText(params) {
       db.collection('users').countDocuments({ roles: config.roles.student }),
       db.collection('users').countDocuments({ roles: config.roles.mentor }),
       db.collection('directions').find({}).toArray(),
-      db.collection('statistic').find({}).sort({ createdAt: -1 }).limit(1)
+      db.collection('statistic').find({ reportChannel: REPORT_CHANNEL }).sort({ createdAt: -1 }).limit(1)
         .toArray(),
     ]
     const [
@@ -183,6 +188,7 @@ async function createText(params) {
       createdAt: new Date(),
       directions,
       processingTime: (new Date() - t0) / 1000,
+      reportChannel: REPORT_CHANNEL,
     }
     const text = await createText({
       studentsAmount,
@@ -192,7 +198,7 @@ async function createText(params) {
       mentorsAmountPerDirection,
       directionsViews,
     })
-    const id = config.reportChannelsId[process.env.REPORT_CHANNEL || 'test']
+    const id = config.reportChannelsId[REPORT_CHANNEL]
     await Promise.all([
       db.collection('statistic').insertOne(data),
       bot.telegram.sendMessage(id, text, { parse_mode: 'HTML' }),
