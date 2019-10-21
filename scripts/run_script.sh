@@ -17,7 +17,7 @@ if [ $(( SCRIPT_NAME )) -eq "ITKPIautopost" ]; then
     fi
 fi
 
-GET_CONFIG_COMMAND="node -e "\""const config = require('./ecosystem.config.js').apps[0].env_${ENV};\
+GET_CONFIG_COMMAND="node -e "\""const config = require(`${__dirname}/ecosystem.config.js`).apps[0].env_${ENV};\
 console.log(config.MONGO_URL, config.BOT_TOKEN, config.TELEGRAPH_ACCESS_TOKEN)"\"""
 CONFIG=$(eval $GET_CONFIG_COMMAND)
 CONFIG_ARRAY=($CONFIG)
