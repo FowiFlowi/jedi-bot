@@ -2,16 +2,16 @@
 
 ENV=$1
 SCRIPT_NAME=$2
-[[ $ENV = 'production' ]] && SHORT_ENV="prod" || SHORT_ENV="dev"
+if [ "$ENV" == 'production' ]; then
+    SHORT_ENV="prod"
+else
+    SHORT_ENV="dev"
+fi
 
 if [ "$SCRIPT_NAME" == "ITKPIautopost" ]; then
-    INTERVAL=3
     REPORT_CHANNEL=$3
-    if [ "$REPORT_CHANNEL" == "prod" ]; then
-        WEEK=$(/bin/date +%U)
-    else
-        WEEK=$(/bin/date +%V)
-    fi
+    INTERVAL=3
+    WEEK=$(/bin/date +%U)
     if [ $(( $WEEK % $INTERVAL )) -ne 0 ]; then
         exit 0
     fi
@@ -28,6 +28,6 @@ MONGO_URL=${CONFIG_ARRAY[0]}
 BOT_TOKEN=${CONFIG_ARRAY[1]}
 TELEGRAPH_ACCESS_TOKEN=${CONFIG_ARRAY[2]}
 
-NODE_COMMAND="REPORT_CHANNEL=${REPORT_CHANNEL} TELEGRAPH_ACCESS_TOKEN=${TELEGRAPH_ACCESS_TOKEN} BOT_TOKEN=${BOT_TOKEN} MONGO_URL=${MONGO_URL} \
+NODE_COMMAND="NODE_ENV=${ENV} REPORT_CHANNEL=${REPORT_CHANNEL} TELEGRAPH_ACCESS_TOKEN=${TELEGRAPH_ACCESS_TOKEN} BOT_TOKEN=${BOT_TOKEN} MONGO_URL=${MONGO_URL} \
 /home/fowi/.nvm/versions/node/v9.8.0/bin/node /home/fowi/node/jedi-bot/${SHORT_ENV}/source/scripts/${SCRIPT_NAME}"
 eval $NODE_COMMAND

@@ -37,7 +37,6 @@ const BATCH_SIZE = 20;
     }
     const t1 = new Date()
     const updTime = (t1 - t0) / 1000
-    await bot.telegram.sendMessage(config.creatorId, `Refreshed user info in ${updTime}sec`)
     console.log(`Update time: ${updTime}sec`)
   } catch (e) {
     await bot.telegram.sendMessage(config.creatorId, `Refresh mentors error: ${e.message}\n${e.stack}`)
