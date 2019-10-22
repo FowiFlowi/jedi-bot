@@ -37,6 +37,7 @@ const {
 // TODO: autoposting to IT KPI channel
 // TODO: provide updating mentor info
 // TODO: add second message "send another direction number"
+// TODO: add /help command
 
 Object.assign(service, {
   get(query = {}, listOptions = {}) {
