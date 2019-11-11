@@ -52,6 +52,17 @@ scene.hears(buttons.home.mentor.mentors, protect(roles.mentor),
 scene.hears(buttons.home.student.searchMentors, protect(roles.student),
   async ctx => ctx.scene.enter(scenes.home.searchMentors))
 
+scene.hears(buttons.about, async ctx => {
+  const [usersAmount, mentorsAmount] = await Promise.all([
+    userService.getCount(),
+    userService.getMentorsCount(),
+  ])
+  const message = config.messages.about
+    .replace('usersAmount', usersAmount)
+    .replace('mentorsAmount', mentorsAmount)
+  return ctx.replyWithHTML(message)
+})
+
 scene.on('text', ctx => ctx.home('Скористуйся кнопками'))
 
 module.exports = scene

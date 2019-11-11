@@ -60,8 +60,7 @@ Object.assign(service, {
     }
     return service.formatUsers(users)
   },
-  getCountByRole(role) {
-    const query = { roles: role }
+  getCount(query = {}) {
     return db.collection('users').countDocuments(query)
   },
   formatUsers(users) {
@@ -71,13 +70,13 @@ Object.assign(service, {
     return service.getByRole(config.roles.mentor, ops)
   },
   getMentorsCount() {
-    return service.getCountByRole(config.roles.mentor)
+    return service.getCount({ roles: config.roles.mentor })
   },
   getStudents(ops = {}) {
     return service.getByRole(config.roles.student, ops)
   },
   getStudentsCount() {
-    return service.getCountByRole(config.roles.student)
+    return service.getCount({ roles: config.roles.student })
   },
   async getByApprovedDirection(directionName, ops = {}) {
     const direction = await directionService.getByName(directionName)
