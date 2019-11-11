@@ -51,7 +51,7 @@ function getPrevStatDirectionInfo(prevStat, direction) {
   return { prevStatMentors, prevStatViews }
 }
 
-const sortIfPrevStatExists = prevStat => (a, b) => {
+const sortIfPrevStatExists = (prevStat, directionsViews) => (a, b) => {
   const { prevStatMentors: prevStatMentorsA } = getPrevStatDirectionInfo(prevStat, a.direction)
   const { prevStatMentors: prevStatMentorsB } = getPrevStatDirectionInfo(prevStat, b.direction)
   if (!prevStatMentorsA) {
@@ -63,6 +63,17 @@ const sortIfPrevStatExists = prevStat => (a, b) => {
   const mentorsAmountDirDiffA = a.amount - prevStatMentorsA.amount
   const mentorsAmountDirDiffB = b.amount - prevStatMentorsB.amount
   if (mentorsAmountDirDiffA === 0 && mentorsAmountDirDiffB === 0) {
+    if (a.amount === b.amount) {
+      const directionViewsA = directionsViews.find(view => view.direction === a.direction)
+      const directionViewsB = directionsViews.find(view => view.direction === b.direction)
+      if (!directionViewsA) {
+        return 1
+      }
+      if (!directionViewsB) {
+        return -1
+      }
+      return directionViewsA.amount > directionViewsB.amount ? -1 : 1
+    }
     return a.amount > b.amount ? -1 : 1
   }
   return mentorsAmountDirDiffA > mentorsAmountDirDiffB
