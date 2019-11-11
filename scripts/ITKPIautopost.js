@@ -51,7 +51,7 @@ function getPrevStatDirectionInfo(prevStat, direction) {
   return { prevStatMentors, prevStatViews }
 }
 
-const sortIfPrevStatExists = (prevStat, directionsViews) => (a, b) => {
+const sortIfPrevStatExists = prevStat => (a, b) => {
   const { prevStatMentors: prevStatMentorsA } = getPrevStatDirectionInfo(prevStat, a.direction)
   const { prevStatMentors: prevStatMentorsB } = getPrevStatDirectionInfo(prevStat, b.direction)
   if (!prevStatMentorsA) {
@@ -60,20 +60,12 @@ const sortIfPrevStatExists = (prevStat, directionsViews) => (a, b) => {
   if (!prevStatMentorsB) {
     return -1
   }
-  const mentorsAmountPerDirDiffA = a.amount - prevStatMentorsA.amount
-  const mentorsAmountPerDirDiffB = b.amount - prevStatMentorsB.amount
-  if (mentorsAmountPerDirDiffA === mentorsAmountPerDirDiffB && a.amount === b.amount) {
-    const directionViewsA = directionsViews.find(view => view.direction === a.direction)
-    const directionViewsB = directionsViews.find(view => view.direction === b.direction)
-    if (!directionViewsA) {
-      return 1
-    }
-    if (!directionViewsB) {
-      return -1
-    }
-    return directionViewsA.amount > directionViewsB.amount ? -1 : 1
+  const mentorsAmountDirDiffA = a.amount - prevStatMentorsA.amount
+  const mentorsAmountDirDiffB = b.amount - prevStatMentorsB.amount
+  if (mentorsAmountDirDiffA === 0 && mentorsAmountDirDiffB === 0) {
+    return a.amount > b.amount ? -1 : 1
   }
-  return mentorsAmountPerDirDiffA > mentorsAmountPerDirDiffB
+  return mentorsAmountDirDiffA > mentorsAmountDirDiffB
     ? -1
     : 1
 }
@@ -93,9 +85,8 @@ const sortWithoutPrevStat = directionsViews => (a, b) => {
   return directionViewsA.amount > directionViewsB.amount ? -1 : 1
 }
 
-async function createNewDirectionsText(directions, prevStatDirections) {
-  const newDirections = lodash.differenceWith(directions, prevStatDirections, lodash.isEqual)
-  const newDirectionDocs = await db.collection('directions').find({ _id: { $in: newDirections } })
+async function createNewDirectionsText(newDirections) {
+  const newDirectionDocs = await db.collection('directions').find({ _id: { $in: newDirections } }).toArray()
   const newDirectionNames = newDirectionDocs.map(doc => escapeHtml(doc.name)).join(', ')
   return `Нові напрями: <b>${newDirectionNames}</b>\n\n`
 }
@@ -121,7 +112,10 @@ async function createText(params) {
   }
   text += '</code>\n\n'
   if (prevStat && prevStat.directions.length < directions.length) {
-    text += await createNewDirectionsText(directions, prevStat.directions)
+    const newDirections = lodash.differenceWith(directions, prevStat.directions, lodash.isEqual)
+    if (newDirections.length) {
+      text += await createNewDirectionsText(newDirections)
+    }
   }
   const directionsAmountText = REPORT_DIRECTIONS_AMOUNT > directions.length
     ? `<b>${directions.length}</b> напрямках`
