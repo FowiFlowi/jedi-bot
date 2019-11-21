@@ -132,7 +132,7 @@ async function createText(params) {
   const directionsAmountText = REPORT_DIRECTIONS_AMOUNT > directions.length
     ? `<b>${directions.length}</b> напрямках`
     : `<b>${REPORT_DIRECTIONS_AMOUNT} з ${directions.length}</b> напрямків`
-  text += `Кількість менторів та переглядів відповідно по ${directionsAmountText}:\n`
+  text += `Кількість менторів та унікальних переглядів відповідно по ${directionsAmountText}:\n`
   const sortFn = prevStat
     ? sortIfPrevStatExists(prevStat, directionsViews)
     : sortWithoutPrevStat(directionsViews)

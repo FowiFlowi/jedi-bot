@@ -23,21 +23,18 @@ const {
   requestStatuses,
 } = config
 
-// TODO: add notifications about new users to another users
-// TODO: add FAQ/info button
-// TODO: mark users that started with "Search mentor" but stopped (no desired direction)
-// TODO: add statistic
 // TODO: Animation for rejecting request
 // TODO: Connect als
 // TODO: validating input messages
 // TOOD: Remove baseScene util
 // TODO: button for KPI chats
-// TODO: rename directions to viewedDirections (database)
 // TOOD: add createdAt field
-// TODO: autoposting to IT KPI channel
-// TODO: provide updating mentor info
+// TODO: provide self-updating mentor info
 // TODO: add second message "send another direction number"
 // TODO: add /help command
+// TODO: add timestamps for requests in the db
+// TODO: change bot description via botfather
+// TODO: add auto backup
 
 Object.assign(service, {
   get(query = {}, listOptions = {}) {
@@ -326,7 +323,7 @@ Object.assign(service, {
   },
   async getMentorDirectionMessage(directionName, request) {
     const views = await service.getDirectionViews(request.directionId)
-    const text = `${directionName}\nПерегляди: ${views}`
+    const text = `${directionName}\nУнікальні перегляди: ${views}`
     if (request.status === requestStatuses.approved) {
       return { text, keyboard: getKeyboard.request(request.directionId) }
     }
