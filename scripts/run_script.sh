@@ -20,6 +20,9 @@ fi
 CD_COMMAND="cd /root/repos/jedi-bot/${ENV}"
 $CD_COMMAND
 
+SOURCE_COMMAND="source /root/.nvm/nvm.sh"
+$SOURCE_COMMAND
+
 GET_CONFIG_COMMAND="node -e "\""const config = require('./ecosystem.config.js').apps[0].env_${ENV};\
 console.log(config.MONGO_URL, config.BOT_TOKEN, config.TELEGRAPH_ACCESS_TOKEN)"\"""
 CONFIG=$(eval $GET_CONFIG_COMMAND)
@@ -28,9 +31,6 @@ CONFIG_ARRAY=($CONFIG)
 MONGO_URL=${CONFIG_ARRAY[0]}
 BOT_TOKEN=${CONFIG_ARRAY[1]}
 TELEGRAPH_ACCESS_TOKEN=${CONFIG_ARRAY[2]}
-
-SOURCE_COMMAND="source /root/.nvm/nvm.sh"
-$SOURCE_COMMAND
 
 NODE_COMMAND="NODE_ENV=${ENV} REPORT_CHANNEL=${REPORT_CHANNEL} TELEGRAPH_ACCESS_TOKEN=${TELEGRAPH_ACCESS_TOKEN} \
 BOT_TOKEN=${BOT_TOKEN} MONGO_URL=${MONGO_URL} node scripts/${SCRIPT_NAME}"

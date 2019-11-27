@@ -11,7 +11,7 @@
     "dev": "nodemon src | pino-pretty",
     "lint": "eslint .",
     "mocha": "NODE_ENV=test mocha .",
-    "test": "yarn lint && yarn mocha",
+    "test": "yarn lint",
     "mongopatch": "mongopatch"
   },
   "dependencies": {
