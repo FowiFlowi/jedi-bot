@@ -10,7 +10,6 @@
     "start": "node src | pino-pretty",
     "dev": "nodemon src | pino-pretty",
     "lint": "eslint .",
-    "mocha": "NODE_ENV=test mocha .",
     "test": "yarn lint",
     "mongopatch": "mongopatch"
   },
