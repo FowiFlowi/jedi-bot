@@ -24,13 +24,14 @@ const BATCH_SIZE = 20;
 
     for (const batch of batches) { // eslint-disable-line no-restricted-syntax
       const tasks = batch.map(async mentor => { // eslint-disable-line no-loop-func
-        bot.telegram.getChat(mentor.tgId)
-          .then(info => userService.upsert(mapFromUser(info)))
-          .catch(e => {
-            logger.error(e)
-            bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${mentor.tgId} Error: ${e.message}\n${e.stack}`)
-            return e.message.includes('chat not found') && userService.update(mentor.tgId, { removedBot: true })
-          })
+        try {
+          const info = await bot.telegram.getChat(mentor.tgId)
+          return userService.upsert(mapFromUser(info))
+        } catch (e) {
+          logger.error(e)
+          bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${mentor.tgId} Error: ${e.message}\n${e.stack}`)
+          return e.message.includes('chat not found') && userService.update(mentor.tgId, { removedBot: true })
+        }
       })
 
       await Promise.all(tasks) // eslint-disable-line no-await-in-loop
