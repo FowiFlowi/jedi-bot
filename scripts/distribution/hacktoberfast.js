@@ -3,10 +3,10 @@
 const config = require('config')
 const lodash = require('lodash')
 
-const db = require('../src/db')
-const bot = require('../src/bot')
-const userService = require('../src/bot/service/user')
-const directionService = require('../src/bot/service/direction')
+const db = require('../../src/db')
+const bot = require('../../src/bot')
+const userService = require('../../src/bot/service/user')
+const directionService = require('../../src/bot/service/direction')
 
 const directionNames = [
   'C#',

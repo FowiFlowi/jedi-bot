@@ -26,7 +26,7 @@ const BATCH_SIZE = 20;
       const tasks = batch.map(async mentor => { // eslint-disable-line no-loop-func
         try {
           const info = await bot.telegram.getChat(mentor.tgId)
-          return userService.upsert(mapFromUser(info))
+          return userService.upsert({ ...mapFromUser(info), removedBot: false })
         } catch (e) {
           logger.error(e)
           bot.telegram.sendMessage(config.creatorId, `Refresh mentor ${mentor.tgId} Error: ${e.message}\n${e.stack}`)

@@ -29,7 +29,6 @@ const {
 // TOOD: Remove baseScene util
 // TODO: button for KPI chats
 // TOOD: add createdAt field
-// TODO: provide self-updating mentor info
 // TODO: add second message "send another direction number"
 // TODO: add /help command
 // TODO: add timestamps for requests in the db
