@@ -9,9 +9,10 @@ jobs:
 
     steps:
     - name: SSH Commands
-      uses: appleboy/ssh-action@v0.0.2
-      with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
-        key: ${{ secrets.SSH_KEY }}
-        script: echo ${{ secrets.APP_PATH }}
+      run: echo ${{ secrets.HOST }}
+#       uses: appleboy/ssh-action@v0.0.2
+#       with:
+#         host: ${{ secrets.HOST }}
+#         username: ${{ secrets.USERNAME }}
+#         key: ${{ secrets.SSH_KEY }}
+#         script: echo ${{ secrets.APP_PATH }}
