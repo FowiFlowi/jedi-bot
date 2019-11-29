@@ -12,4 +12,6 @@ jobs:
         host: ${{ secrets.HOST }}
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
-        script: pm2 startOrRestart ${{ secrets.APP_PATH }}/ecosystem.config.js --env development
+        script: |
+          source ~/.nvm/nvm.sh
+          pm2 startOrRestart ${{ secrets.APP_PATH }}/ecosystem.config.js --env development
