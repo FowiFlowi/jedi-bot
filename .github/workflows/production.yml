@@ -17,4 +17,4 @@ jobs:
         key: ${{ secrets.SSH_KEY }}
         script: |
           source ~/.nvm/nvm.sh
-          pm2 startOrRestart ${{ secrets.PROD_JEDI_BOT_APP_PATH }}/ecosystem.config.js --env development
+          pm2 startOrRestart ${{ secrets.PROD_JEDI_BOT_APP_PATH }}/ecosystem.config.js --env production
