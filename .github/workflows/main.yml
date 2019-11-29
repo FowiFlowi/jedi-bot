@@ -11,7 +11,7 @@ jobs:
     - name: SSH Commands
       uses: appleboy/ssh-action@v0.0.2
       with:
-        host: 46.101.149.100
+        host: '46.101.149.100'
         username: ${{ secrets.USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: whoami
