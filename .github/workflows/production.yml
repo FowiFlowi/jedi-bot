@@ -1,12 +1,12 @@
-name: remote ssh command
+name: Production deploy
 on:
   push:
     branches:
       - master
 jobs:
 
-  build:
-    name: Build
+  deploy:
+    name: Deploy
     runs-on: ubuntu-latest
     steps:
     - name: executing remote ssh commands
@@ -16,5 +16,8 @@ jobs:
         username: ${{ secrets.DO_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: |
+          cd ${{ secrets.PROD_JEDI_BOT_APP_PATH }}
+          git pull origin dev
           source ~/.nvm/nvm.sh
-          pm2 startOrRestart ${{ secrets.PROD_JEDI_BOT_APP_PATH }}/ecosystem.config.js --env production
+          npm i
+          pm2 startOrRestart ecosystem.config.js --env production
