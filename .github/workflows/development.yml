@@ -1,5 +1,8 @@
 name: remote ssh command
-on: [push]
+on:
+  push:
+    branches:    
+      - dev  
 jobs:
 
   build:
@@ -9,9 +12,9 @@ jobs:
     - name: executing remote ssh commands
       uses: appleboy/ssh-action@master
       with:
-        host: ${{ secrets.HOST }}
-        username: ${{ secrets.USERNAME }}
+        host: ${{ secrets.DO_HOST }}
+        username: ${{ secrets.DO_USERNAME }}
         key: ${{ secrets.SSH_KEY }}
         script: |
           source ~/.nvm/nvm.sh
-          pm2 startOrRestart ${{ secrets.APP_PATH }}/ecosystem.config.js --env development
+          pm2 startOrRestart ${{ secrets.DEV_JEDI_BOT_APP_PATH }}/ecosystem.config.js --env development
