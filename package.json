@@ -1,40 +1,37 @@
 {
   "name": "jedi-bot",
-  "version": "1.0.0",
-  "description": "",
-  "main": "src/index.js",
-  "repository": "",
-  "author": "fowi",
+  "version": "2.0.0",
+  "main": "index.js",
+  "repository": "git@github.com:FowiFlowi/jedi-bot.git",
+  "author": "Mykola Symotiuk <fowiflowi@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "start": "node src | pino-pretty",
-    "dev": "nodemon src | pino-pretty",
+    "build": "tsc",
+    "watch": "tsc --watch",
     "lint": "eslint .",
-    "test": "yarn lint",
-    "mongopatch": "mongopatch"
+    "start": "node dist/index.js"
   },
-  "dependencies": {
-    "async-local-storage": "^2.1.0",
-    "config": "^3.0.1",
-    "koa": "^2.7.0",
-    "koa-bodyparser": "^4.2.1",
-    "koa-router": "^7.4.0",
-    "lodash": "^4.17.15",
-    "mongodb": "^3.1.13",
-    "node-env-manager": "^1.1.0",
-    "pino": "^5.11.1",
-    "telegra.ph": "^1.0.1",
-    "telegraf": "^3.27.1"
+  "husky": {
+    "pre-commit": "yarn lint"
+  },
+  "_moduleAliases": {
+    "@config": "dist/config/index.js",
+    "@interfaces": "dist/interfaces"
   },
   "devDependencies": {
-    "chai": "^4.2.0",
-    "eslint": "^5.13.0",
-    "eslint-config-airbnb-base": "^13.1.0",
-    "eslint-plugin-import": "^2.16.0",
-    "mocha": "^5.2.0",
-    "mongopatch": "^2.0.2",
-    "nock": "^10.0.6",
-    "pino-pretty": "^2.5.0",
-    "pre-commit": "^1.2.2"
+    "@tsconfig/node14": "^1.0.0",
+    "@types/node": "^14.14.10",
+    "@typescript-eslint/eslint-plugin": "^4.8.2",
+    "@typescript-eslint/parser": "^4.8.2",
+    "eslint": "^7.14.0",
+    "husky": "^4.3.0",
+    "typescript": "^4.1.2"
+  },
+  "dependencies": {
+    "dotenv-safe": "^8.2.0",
+    "module-alias": "^2.2.2",
+    "mongoose": "^5.10.16",
+    "telegraf": "^3.38.0",
+    "ts-node": "^9.0.0"
   }
 }
